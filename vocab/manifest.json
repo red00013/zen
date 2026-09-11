@@ -1,0 +1,10 @@
+{
+  "name": "Zen's Vocab Quest",
+  "short_name": "Zen Vocab",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#6d5dfc",
+  "description": "Zen's Vocab Quest",
+  "icons": []
+}

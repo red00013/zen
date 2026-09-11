@@ -1,0 +1,10 @@
+{
+  "name": "Zen's Times Tables",
+  "short_name": "Zen Times",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#6d5dfc",
+  "description": "Zen's Times Tables",
+  "icons": []
+}

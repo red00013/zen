@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#6d5dfc">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Zen Times">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Zen's Times Tables</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#68728a;--accent:#6d5dfc;--good:#16834a;--bad:#c43d3d}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#f5f7ff,#eef7f5);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);min-height:100vh}
+button{font:inherit;border:0;cursor:pointer;min-height:44px;border-radius:12px;padding:10px 15px;font-weight:750}
+.app{width:min(760px,100%);margin:auto;padding:20px 18px 35px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.logo{font-size:23px;font-weight:850}.sub,.small{font-size:13px;color:var(--muted)}
+.panel{background:var(--card);border-radius:24px;box-shadow:0 12px 35px #1820331f;padding:22px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:14px 0}.stat{text-align:center;background:#f5f6fa;border-radius:14px;padding:10px}.stat b{display:block;font-size:21px}
+.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 17px}.tab{background:#e9ebf2;color:#596579}.tab.active{background:var(--accent);color:white}
+.mode{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.mode button{background:#eef0f5}.mode button.active{background:#e8e6ff;outline:2px solid var(--accent)}
+.question{text-align:center;padding:25px 5px 8px}.equation{font-size:clamp(43px,10vw,72px);font-weight:900;letter-spacing:-2px;margin:15px 0 25px}.answer{font-size:clamp(38px,8vw,58px);font-weight:900;min-height:70px}.hidden{visibility:hidden}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}.primary{background:var(--accent);color:white;min-width:150px}.secondary{background:#eceef5}.good{background:#e5f6ec;color:var(--good)}.bad{background:#fde9e8;color:var(--bad)}
+.quizChoices{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:520px;margin:15px auto}.choice{font-size:22px;background:#eef0f5}.result{font-weight:800;min-height:25px;margin-top:12px}
+@media(max-width:430px){.quizChoices{grid-template-columns:1fr}.panel{padding:17px}.equation{font-size:43px}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="top"><div><div class="logo">🧠 Zen's Times Tables</div><div class="sub">Multiplication facts through 15 × 15</div></div><button id="reset">↺ Reset</button></div>
+<div class="panel">
+<div class="stats"><div class="stat"><b id="known">0</b><span class="small">Know it</span></div><div class="stat"><b id="practice">0</b><span class="small">Need practice</span></div><div class="stat"><b id="remaining">225</b><span class="small">Not rated</span></div></div>
+<div class="small">Choose a times table</div><div id="tables" class="tabs"></div>
+<div class="mode"><button id="flashMode" class="active">🃏 Flashcards</button><button id="quizMode">🎯 Quiz</button><button id="mixedMode">🔀 Mixed</button></div>
+<section id="flash" class="question">
+<div class="small" id="progressText">1 / 15</div><div class="equation" id="equation">1 × 1 = ?</div>
+<div id="answer" class="answer hidden">1</div>
+<div class="actions"><button id="show" class="primary">Show Answer</button><button id="next" class="secondary">Next →</button></div>
+<div id="rating" class="actions" hidden><button id="need" class="bad">↻ I Need Practice</button><button id="know" class="good">✓ I Know It</button></div>
+</section>
+<section id="quiz" class="question" hidden>
+<div class="small">Choose the correct answer</div><div class="equation" id="quizEquation">1 × 1 = ?</div><div id="choices" class="quizChoices"></div><div id="quizResult" class="result"></div>
+<div class="actions"><button id="quizNext" class="primary">Next Question →</button></div>
+</section>
+</div>
+<p class="small" style="text-align:center">Progress is saved on this device. No account or internet connection required.</p>
+</div>
+<script>
+(()=> {
+const facts=[]; for(let a=1;a<=15;a++)for(let b=1;b<=15;b++)facts.push({a,b,key:a+"x"+b,answer:a*b});
+let selected=1, mode="flash", deck=[], index=0, current=null;
+let progress={}; try{progress=JSON.parse(localStorage.getItem("zenTimesProgress")||"{}")}catch(e){}
+const $=id=>document.getElementById(id);
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function unitDeck(){return selected==="mixed"?facts.slice():facts.filter(f=>f.a===selected||f.b===selected)}
+function buildTables(){for(let n=1;n<=15;n++){let b=document.createElement("button");b.className="tab"+(n===selected?" active":"");b.textContent="×"+n;b.addEventListener("click",()=>{selected=n;mode="flash";deck=shuffle(unitDeck());index=0;showFlash();render();highlight()});$("tables").appendChild(b)}}
+function highlight(){[...$("tables").children].forEach((b,i)=>b.classList.toggle("active",selected===i+1))}
+function updateStats(){let cs=unitDeck(),k=0,p=0;cs.forEach(f=>{if(progress[f.key]==="know")k++;if(progress[f.key]==="practice")p++});$("known").textContent=k;$("practice").textContent=p;$("remaining").textContent=cs.length-k-p}
+function render(){current=deck[index%deck.length];$("equation").textContent=current.a+" × "+current.b+" = ?";$("answer").textContent=current.answer;$("answer").classList.add("hidden");$("show").textContent="Show Answer";$("rating").hidden=true;$("progressText").textContent=(index%deck.length+1)+" / "+deck.length;updateStats()}
+function showAnswer(){let hidden=$("answer").classList.contains("hidden");$("answer").classList.toggle("hidden");$("show").textContent=hidden?"Hide Answer":"Show Answer";$("rating").hidden=!hidden}
+function rate(v){progress[current.key]=v;localStorage.setItem("zenTimesProgress",JSON.stringify(progress));next()}
+function next(){index++;render()}
+function setButtons(){ $("flashMode").classList.toggle("active",mode==="flash");$("quizMode").classList.toggle("active",mode==="quiz");$("mixedMode").classList.toggle("active",mode==="mixed")}
+function showFlash(){$("flash").hidden=false;$("quiz").hidden=true;setButtons()}
+function startQuiz(){mode="quiz";deck=shuffle(unitDeck());index=0;$("flash").hidden=true;$("quiz").hidden=false;setButtons();newQuiz()}
+function newQuiz(){current=deck[index%deck.length];$("quizEquation").textContent=current.a+" × "+current.b+" = ?";$("quizResult").textContent="";let vals=new Set([current.answer]);while(vals.size<4)vals.add(facts[Math.floor(Math.random()*facts.length)].answer);$("choices").innerHTML="";shuffle([...vals]).forEach(v=>{let b=document.createElement("button");b.className="choice";b.textContent=v;b.addEventListener("click",()=>{let ok=v===current.answer;$("quizResult").textContent=ok?"🎉 Correct!":"Not quite — "+current.a+" × "+current.b+" = "+current.answer;if(ok){progress[current.key]="know";localStorage.setItem("zenTimesProgress",JSON.stringify(progress));updateStats()}});$("choices").appendChild(b)})}
+$("show").addEventListener("click",showAnswer);$("next").addEventListener("click",next);$("know").addEventListener("click",()=>rate("know"));$("need").addEventListener("click",()=>rate("practice"));
+$("flashMode").addEventListener("click",()=>{mode="flash";deck=shuffle(unitDeck());index=0;showFlash();render()});
+$("mixedMode").addEventListener("click",()=>{selected="mixed";mode="flash";deck=shuffle(facts);index=0;showFlash();render();highlight()});
+$("quizMode").addEventListener("click",startQuiz);$("quizNext").addEventListener("click",()=>{index++;newQuiz()});
+$("reset").addEventListener("click",()=>{if(confirm("Reset all saved progress?")){progress={};localStorage.removeItem("zenTimesProgress");updateStats()}});
+document.addEventListener("keydown",e=>{if(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA")return;if(e.key==="ArrowRight")next();});
+buildTables();deck=shuffle(unitDeck());render();
+})();
+</script>
+<script>if ("serviceWorker" in navigator) { navigator.serviceWorker.register("sw.js").catch(()=>{}); }</script>
+</body>
+</html>
