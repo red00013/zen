@@ -1,0 +1,3 @@
+const CACHE='zen-v1';
+self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./','./index.html','./math/long-division.html','./math/improper-fractions.html','./math/factor-tree.html','./math/adding-fractions.html','./math/thumbnails/long-division.png','./math/thumbnails/improper-fractions.png','./math/thumbnails/factor-tree.png','./math/thumbnails/adding-fractions.png','./monsters/','./monsters/index.html','./vocab/','./vocab/index.html','./vocab/manifest.json','./times/','./times/index.html','./times/manifest.json']))));
+self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));
