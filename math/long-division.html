@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Long Division Lab 🔬</title>
+<style>
+  :root{
+    --cream:#FFF6E9;
+    --card:#ffffff;
+    --coral:#FF6B6B;
+    --coral-d:#E85555;
+    --teal:#4ECDC4;
+    --teal-d:#3BB5AC;
+    --yellow:#FFD93D;
+    --ink:#2D3142;
+    --ink-soft:#5a5f7a;
+    --green:#51cf66;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0; background:var(--cream); color:var(--ink);
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding:16px; line-height:1.45;
+  }
+  .wrap{max-width:760px; margin:0 auto;}
+  h1{font-size:1.9rem; text-align:center; margin:8px 0 4px;}
+  .sub{text-align:center; color:var(--ink-soft); margin:0 0 8px;}
+  .card{
+    background:var(--card); border-radius:20px; padding:20px;
+    box-shadow:0 4px 14px rgba(45,49,66,.08); margin:14px 0; position:relative;
+  }
+  /* ---------- buttons & tabs ---------- */
+  .btn{
+    min-height:52px; padding:12px 22px; font-size:1.15rem; font-weight:700;
+    border:none; border-radius:16px; cursor:pointer; touch-action:manipulation;
+    color:#fff; font-family:inherit;
+  }
+  .btn-coral{background:var(--coral);}
+  .btn-coral:active{background:var(--coral-d); transform:scale(.97);}
+  .btn-teal{background:var(--teal);}
+  .btn-teal:active{background:var(--teal-d); transform:scale(.97);}
+  .btn:disabled{opacity:.5; cursor:default; transform:none;}
+  .tabs{display:flex; gap:12px; margin:12px 0;}
+  .tab{
+    flex:1; min-height:58px; font-size:1.3rem; font-weight:800; font-family:inherit;
+    border-radius:16px; border:3px solid transparent; background:#fff; color:var(--ink);
+    touch-action:manipulation; cursor:pointer;
+  }
+  .tab.active{background:var(--ink); color:#fff;}
+  .btnrow{display:flex; gap:10px; flex-wrap:wrap; margin:10px 0;}
+  .pill{
+    min-height:48px; padding:10px 18px; font-size:1.05rem; font-weight:700; font-family:inherit;
+    border-radius:999px; border:3px solid var(--ink); background:#fff; color:var(--ink);
+    touch-action:manipulation; cursor:pointer;
+  }
+  .pill.active{background:var(--yellow);}
+  /* ---------- how to play ---------- */
+  details.how{background:#fff; border-radius:16px; padding:0 16px; margin:10px 0;
+    box-shadow:0 4px 14px rgba(45,49,66,.08);}
+  details.how summary{
+    min-height:52px; display:flex; align-items:center; font-size:1.15rem; font-weight:800;
+    cursor:pointer; touch-action:manipulation; list-style:none;
+  }
+  details.how summary::-webkit-details-marker{display:none;}
+  details.how p{margin:0 0 14px; font-size:1.05rem;}
+  /* ---------- learn tableau ---------- */
+  .caption{font-size:1.22rem; font-weight:600; min-height:3.4em; margin:8px 0;}
+  .stepcount{color:var(--ink-soft); font-weight:700; margin-bottom:6px;}
+  .tableau-wrap{text-align:center; overflow-x:auto; padding:4px;}
+  .tableau{display:inline-block; background:#fffdf7; border:3px solid var(--ink);
+    border-radius:16px; padding:14px 18px; margin:8px auto;}
+  .trow{display:flex; justify-content:flex-start;}
+  .tc{
+    width:1.35em; height:1.45em; display:flex; align-items:center; justify-content:center;
+    font-size:2rem; font-weight:700;
+    font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  .tc.over{border-top:4px solid var(--ink);}
+  .tc.ul{border-bottom:4px solid var(--ink);}
+  .tc.hl{background:var(--yellow); border-radius:10px;}
+  .done-note{font-size:1.3rem; font-weight:800; color:var(--teal-d);}
+  /* ---------- practice ---------- */
+  .diff-row{display:flex; gap:10px; flex-wrap:wrap;}
+  .prob{font-size:2.4rem; font-weight:800; text-align:center; margin:10px 0;}
+  .ansrow{display:flex; gap:14px; justify-content:center; align-items:flex-end; flex-wrap:wrap; margin:10px 0;}
+  .ansbox{display:flex; flex-direction:column; align-items:center; gap:6px;}
+  .ansbox label{font-size:1.05rem; font-weight:700; color:var(--ink-soft);}
+  .ans{
+    width:120px; height:72px; font-size:2.4rem; font-weight:800; text-align:center;
+    border:3px solid var(--ink); border-radius:16px; font-family:inherit; color:var(--ink);
+    background:#fffdf7;
+  }
+  .ans:focus{outline:3px solid var(--yellow); border-color:var(--ink);}
+  .msg{font-size:1.3rem; font-weight:800; min-height:1.8em; text-align:center; margin:8px 0 0;}
+  .explain{font-size:1.1rem; text-align:center; color:var(--ink-soft); min-height:1.6em; margin:4px 0;}
+  .stats{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:10px 0;}
+  .stat{background:var(--cream); border-radius:14px; padding:8px 16px; font-size:1.1rem; font-weight:800;}
+  .topbar{display:flex; justify-content:flex-end; margin-bottom:4px;}
+  .iconbtn{
+    min-width:52px; min-height:52px; font-size:1.5rem; border-radius:14px; border:3px solid var(--ink);
+    background:#fff; cursor:pointer; touch-action:manipulation;
+  }
+  /* ---------- animations ---------- */
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    20%{transform:translateX(-10px);} 40%{transform:translateX(10px);}
+    60%{transform:translateX(-6px);} 80%{transform:translateX(6px);}
+  }
+  .shake{animation:shake .45s;}
+  @keyframes flashGood{
+    0%{background:#fff;} 30%{background:#d3f9d8;} 100%{background:#fff;}
+  }
+  .flash-good{animation:flashGood .7s;}
+  .confetti-layer{position:absolute; inset:0; pointer-events:none; overflow:visible;}
+  .confetti{
+    position:absolute; width:12px; height:12px; border-radius:3px; z-index:10;
+    animation:pop 1.4s ease-out forwards;
+  }
+  @keyframes pop{
+    0%{transform:translate(0,0) rotate(0deg); opacity:1;}
+    100%{transform:translate(var(--dx),var(--dy)) rotate(540deg); opacity:0;}
+  }
+  @media (max-width:480px){
+    .tc{font-size:1.6rem;}
+    .prob{font-size:2rem;}
+    .ans{width:100px; height:64px; font-size:2rem;}
+  }
+  .home-btn{display:inline-flex;align-items:center;gap:6px;min-height:48px;padding:10px 20px;background:#FF6B6B;color:#fff;font-weight:700;font-size:1.05rem;text-decoration:none;border-radius:999px;box-shadow:0 2px 6px rgba(45,49,66,.15);font-family:inherit;}
+  .home-btn:active{transform:scale(.96);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="home-btn" href="../">⌂ Home</a>
+  <h1>🔬 Long Division Lab</h1>
+  <p class="sub">Divide like a scientist — one step at a time!</p>
+
+  <details class="how">
+    <summary>❓ How to play</summary>
+    <p>Tap <b>📖 Learn</b> to watch long division solved one tiny step at a time — press <b>Next step</b> to reveal each move. Then tap <b>✏️ Practice</b> and solve problems yourself: type the <b>quotient</b> (the answer) and the <b>remainder</b> (what's left over, 0 if nothing), then press <b>Check</b>. Streaks earn stars — can you get 5 in a row? 🎯</p>
+  </details>
+
+  <div class="tabs">
+    <button class="tab active" id="tabLearn">📖 Learn</button>
+    <button class="tab" id="tabPractice">✏️ Practice</button>
+  </div>
+
+  <!-- ================= LEARN ================= -->
+  <section id="learnPanel">
+    <div class="card">
+      <div class="btnrow" id="exPicker"></div>
+      <div class="stepcount" id="stepCount"></div>
+      <div class="caption" id="caption"></div>
+      <div class="tableau-wrap"><div class="tableau" id="tableau"></div></div>
+      <div class="btnrow">
+        <button class="btn btn-coral" id="nextBtn">Next step ➜</button>
+        <button class="btn btn-teal" id="restartBtn">↺ Restart example</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PRACTICE ================= -->
+  <section id="practicePanel" hidden>
+    <div class="card" id="practiceCard">
+      <div class="confetti-layer" id="confettiLayer"></div>
+      <div class="topbar">
+        <button class="iconbtn" id="muteBtn" aria-label="Toggle sound">🔊</button>
+      </div>
+      <div class="diff-row">
+        <button class="pill active" data-diff="easy">😌 Easy<br><small>2-digit ÷ 1-digit</small></button>
+        <button class="pill" data-diff="medium">🙂 Medium<br><small>3-digit ÷ 1-digit</small></button>
+        <button class="pill" data-diff="hard">🤓 Hard<br><small>3-digit ÷ 11–25</small></button>
+      </div>
+      <div class="prob" id="probText">–</div>
+      <div class="ansrow">
+        <div class="ansbox">
+          <label for="qIn">Quotient (answer)</label>
+          <input class="ans" id="qIn" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" aria-label="Quotient">
+        </div>
+        <div class="ansbox">
+          <label for="rIn">Remainder (0 if none)</label>
+          <input class="ans" id="rIn" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" aria-label="Remainder">
+        </div>
+      </div>
+      <div class="btnrow" style="justify-content:center;">
+        <button class="btn btn-coral" id="checkBtn">Check ✔</button>
+        <button class="btn btn-teal" id="newBtn">🎲 New problem</button>
+      </div>
+      <div class="msg" id="msg"></div>
+      <div class="explain" id="explain"></div>
+      <div class="stats">
+        <div class="stat">⭐ Score: <span id="score">0</span></div>
+        <div class="stat">🔥 Streak: <span id="streak">0</span></div>
+        <div class="stat">🏆 Best: <span id="best">0</span></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ============================================================
+   LEARN — hardcoded worked examples (arithmetic hand-verified)
+   Columns: 0=divisor, 1=bracket, 2-4=dividend digits.
+   q = quotient row (5 cells); rows = work rows below dividend.
+   ul:[s,e] draws a subtraction line under that row, cols s..e.
+   ============================================================ */
+var EXAMPLES = [
+  {
+    name: "156 ÷ 4", n: 156, d: 4,
+    steps: [
+      { cap: "Let's solve 156 ÷ 4! The 156 goes under the roof 🏠, and 4 waits outside.",
+        q:["","","","",""], rows:[] },
+      { cap: "4 can't go into 1, so we use the first two digits: 15.",
+        q:["","","","",""], rows:[], divHl:[2,3] },
+      { cap: "How many 4s fit into 15? Three! (4, 8, 12… 16 is too big.) Write 3 up top.",
+        q:["","","","3",""], qHl:[3], rows:[] },
+      { cap: "Multiply back: 3 × 4 = 12. Write 12 under the 15.",
+        q:["","","","3",""], rows:[{c:["","","1","2",""], hl:[2,3]}] },
+      { cap: "Subtract: 15 − 12 = 3.",
+        q:["","","","3",""], rows:[
+          {c:["","","1","2",""], ul:[2,3]},
+          {c:["","","","3",""], hl:[3]}] },
+      { cap: "Bring down the 6 — it drops in next to the 3, making 36!",
+        q:["","","","3",""], rows:[
+          {c:["","","1","2",""], ul:[2,3]},
+          {c:["","","","3","6"], hl:[4]}] },
+      { cap: "How many 4s fit into 36? Nine! Write 9 up top.",
+        q:["","","","3","9"], qHl:[4], rows:[
+          {c:["","","","1","2"], ul:[3,4]},
+          {c:["","","","3","6"]}] },
+      { cap: "Multiply back: 9 × 4 = 36. Write 36 underneath.",
+        q:["","","","3","9"], rows:[
+          {c:["","","","1","2"], ul:[3,4]},
+          {c:["","","","3","6"]},
+          {c:["","","","3","6"], hl:[3,4], ul:[3,4]}] },
+      { cap: "Subtract: 36 − 36 = 0. Nothing left to bring down — we're done! 🎉 156 ÷ 4 = 39. Double-check: 4 × 39 = 156 ✓",
+        q:["","","","3","9"], rows:[
+          {c:["","","","1","2"], ul:[3,4]},
+          {c:["","","","3","6"]},
+          {c:["","","","3","6"], ul:[3,4]},
+          {c:["","","","","0"], hl:[4]}] }
+    ]
+  },
+  {
+    name: "372 ÷ 3", n: 372, d: 3,
+    steps: [
+      { cap: "Now let's try 372 ÷ 3. Same idea — set it up!",
+        q:["","","","",""], rows:[] },
+      { cap: "How many 3s fit into 3? One! Write 1 up top.",
+        q:["","","1","",""], qHl:[2], rows:[] },
+      { cap: "Multiply back: 1 × 3 = 3. Write the 3 right under the first 3.",
+        q:["","","1","",""], rows:[{c:["","","3","",""], hl:[2]}] },
+      { cap: "Subtract: 3 − 3 = 0.",
+        q:["","","1","",""], rows:[
+          {c:["","","3","",""], ul:[2,2]},
+          {c:["","","0","",""], hl:[2]}] },
+      { cap: "Bring down the 7 — now we have 7.",
+        q:["","","1","",""], rows:[
+          {c:["","","3","",""], ul:[2,2]},
+          {c:["","","0","7",""], hl:[3]}] },
+      { cap: "How many 3s fit into 7? Two! (3 × 2 = 6.) Write 2 up top.",
+        q:["","","1","2",""], qHl:[3], rows:[
+          {c:["","","3","",""], ul:[2,2]},
+          {c:["","","0","7",""]}] },
+      { cap: "Multiply back: 2 × 3 = 6. Write 6 under the 7.",
+        q:["","","1","2",""], rows:[
+          {c:["","","3","",""], ul:[2,2]},
+          {c:["","","0","7",""]},
+          {c:["","","","6",""], hl:[3], ul:[3,3]}] },
+      { cap: "Subtract: 7 − 6 = 1.",
+        q:["","","1","2",""], rows:[
+          {c:["","","3","",""], ul:[2,2]},
+          {c:["","","0","7",""]},
+          {c:["","","","6",""], ul:[3,3]},
+          {c:["","","","1",""], hl:[3]}] },
+      { cap: "Bring down the 2 — now we have 12.",
+        q:["","","1","2",""], rows:[
+          {c:["","","3","",""], ul:[2,2]},
+          {c:["","","0","7",""]},
+          {c:["","","","6",""], ul:[3,3]},
+          {c:["","","","1","2"], hl:[4]}] },
+      { cap: "How many 3s fit into 12? Four! Write 4 up top.",
+        q:["","","1","2","4"], qHl:[4], rows:[
+          {c:["","","3","",""], ul:[2,2]},
+          {c:["","","0","7",""]},
+          {c:["","","","6",""], ul:[3,3]},
+          {c:["","","","1","2"]}] },
+      { cap: "Multiply back: 4 × 3 = 12. Subtract: 12 − 12 = 0. Nothing left — remainder 0! 🎉 372 ÷ 3 = 124. Double-check: 3 × 124 = 372 ✓",
+        q:["","","1","2","4"], rows:[
+          {c:["","","3","",""], ul:[2,2]},
+          {c:["","","0","7",""]},
+          {c:["","","","6",""], ul:[3,3]},
+          {c:["","","","1","2"]},
+          {c:["","","","1","2"], hl:[3,4], ul:[3,4]},
+          {c:["","","","","0"], hl:[4]}] }
+    ]
+  },
+  {
+    name: "847 ÷ 5", n: 847, d: 5,
+    steps: [
+      { cap: "Trickier one: 847 ÷ 5. This time there will be a remainder — watch for it! 👀",
+        q:["","","","",""], rows:[] },
+      { cap: "How many 5s fit into 8? One! Write 1 up top.",
+        q:["","","1","",""], qHl:[2], rows:[] },
+      { cap: "Multiply back: 1 × 5 = 5. Write 5 under the 8.",
+        q:["","","1","",""], rows:[{c:["","","5","",""], hl:[2]}] },
+      { cap: "Subtract: 8 − 5 = 3.",
+        q:["","","1","",""], rows:[
+          {c:["","","5","",""], ul:[2,2]},
+          {c:["","","3","",""], hl:[2]}] },
+      { cap: "Bring down the 4 — now we have 34.",
+        q:["","","1","",""], rows:[
+          {c:["","","5","",""], ul:[2,2]},
+          {c:["","","3","4",""], hl:[3]}] },
+      { cap: "How many 5s fit into 34? Six! (5 × 6 = 30, and 35 is too big.) Write 6 up top.",
+        q:["","","1","6",""], qHl:[3], rows:[
+          {c:["","","5","",""], ul:[2,2]},
+          {c:["","","3","4",""]}] },
+      { cap: "Multiply back: 6 × 5 = 30. Write 30 under the 34.",
+        q:["","","1","6",""], rows:[
+          {c:["","","5","",""], ul:[2,2]},
+          {c:["","","3","4",""]},
+          {c:["","","3","0",""], hl:[2,3], ul:[2,3]}] },
+      { cap: "Subtract: 34 − 30 = 4.",
+        q:["","","1","6",""], rows:[
+          {c:["","","5","",""], ul:[2,2]},
+          {c:["","","3","4",""]},
+          {c:["","","3","0",""], ul:[2,3]},
+          {c:["","","","4",""], hl:[3]}] },
+      { cap: "Bring down the 7 — now we have 47.",
+        q:["","","1","6",""], rows:[
+          {c:["","","5","",""], ul:[2,2]},
+          {c:["","","3","4",""]},
+          {c:["","","3","0",""], ul:[2,3]},
+          {c:["","","","4","7"], hl:[4]}] },
+      { cap: "How many 5s fit into 47? Nine! (5 × 9 = 45.) Write 9 up top.",
+        q:["","","1","6","9"], qHl:[4], rows:[
+          {c:["","","5","",""], ul:[2,2]},
+          {c:["","","3","4",""]},
+          {c:["","","3","0",""], ul:[2,3]},
+          {c:["","","","4","7"]}] },
+      { cap: "Multiply back: 9 × 5 = 45. Subtract: 47 − 45 = 2. Nothing left to bring down — that 2 is the remainder! 🎉 847 ÷ 5 = 169 remainder 2. Double-check: 5 × 169 + 2 = 847 ✓",
+        q:["","","1","6","9"], rows:[
+          {c:["","","5","",""], ul:[2,2]},
+          {c:["","","3","4",""]},
+          {c:["","","3","0",""], ul:[2,3]},
+          {c:["","","","4","7"]},
+          {c:["","","","4","5"], hl:[3,4], ul:[3,4]},
+          {c:["","","","","2"], hl:[4]}] }
+    ]
+  }
+];
+
+var exIdx = 0, stepIdx = 0;
+var exPicker = document.getElementById('exPicker');
+var captionEl = document.getElementById('caption');
+var tableauEl = document.getElementById('tableau');
+var stepCountEl = document.getElementById('stepCount');
+var nextBtn = document.getElementById('nextBtn');
+
+function inArr(a, v){ return a && a.indexOf(v) !== -1; }
+
+function cell(ch, cls){
+  return '<span class="tc' + (cls ? ' ' + cls : '') + '">' + (ch === "" ? "&nbsp;" : ch) + "</span>";
+}
+
+function renderLearn(){
+  var ex = EXAMPLES[exIdx];
+  var st = ex.steps[stepIdx];
+  var divStr = String(ex.d), nStr = String(ex.n);
+
+  // example picker buttons
+  var ph = "";
+  for (var i = 0; i < EXAMPLES.length; i++){
+    ph += '<button class="pill' + (i === exIdx ? " active" : "") + '" data-ex="' + i + '">' + EXAMPLES[i].name + "</button>";
+  }
+  exPicker.innerHTML = ph;
+  var pills = exPicker.querySelectorAll('.pill');
+  for (var p = 0; p < pills.length; p++){
+    pills[p].addEventListener('click', function(){
+      exIdx = parseInt(this.getAttribute('data-ex'), 10);
+      stepIdx = 0;
+      renderLearn();
+    });
+  }
+
+  stepCountEl.textContent = "Step " + (stepIdx + 1) + " of " + ex.steps.length;
+  captionEl.textContent = st.cap;
+
+  // quotient row
+  var html = '<div class="trow">';
+  for (var c = 0; c < 5; c++){
+    html += cell(st.q[c] || "", inArr(st.qHl, c) ? "hl" : "");
+  }
+  html += "</div>";
+
+  // divisor row: divisor, bracket, dividend digits with overline
+  html += '<div class="trow">';
+  html += cell(divStr, "");
+  html += cell(")", "");
+  for (var k = 0; k < 3; k++){
+    html += cell(nStr.charAt(k), "over" + (inArr(st.divHl, k + 2) ? " hl" : ""));
+  }
+  html += "</div>";
+
+  // work rows
+  for (var r = 0; r < st.rows.length; r++){
+    var row = st.rows[r];
+    html += '<div class="trow">';
+    for (var cc = 0; cc < 5; cc++){
+      var cls = "";
+      if (inArr(row.hl, cc)) cls += "hl";
+      if (row.ul && cc >= row.ul[0] && cc <= row.ul[1]) cls += (cls ? " " : "") + "ul";
+      html += cell(row.c[cc] || "", cls);
+    }
+    html += "</div>";
+  }
+  tableauEl.innerHTML = html;
+
+  // next button state
+  if (stepIdx >= ex.steps.length - 1){
+    nextBtn.textContent = "Done! 🎉";
+    nextBtn.disabled = true;
+  } else {
+    nextBtn.textContent = "Next step ➜";
+    nextBtn.disabled = false;
+  }
+}
+
+nextBtn.addEventListener('click', function(){
+  var ex = EXAMPLES[exIdx];
+  if (stepIdx < ex.steps.length - 1){ stepIdx++; renderLearn(); }
+});
+document.getElementById('restartBtn').addEventListener('click', function(){
+  stepIdx = 0; renderLearn();
+});
+
+/* ============================================================
+   TABS
+   ============================================================ */
+var tabLearn = document.getElementById('tabLearn');
+var tabPractice = document.getElementById('tabPractice');
+var learnPanel = document.getElementById('learnPanel');
+var practicePanel = document.getElementById('practicePanel');
+function showTab(which){
+  var learn = (which === 'learn');
+  learnPanel.hidden = !learn;
+  practicePanel.hidden = learn;
+  tabLearn.classList.toggle('active', learn);
+  tabPractice.classList.toggle('active', !learn);
+}
+tabLearn.addEventListener('click', function(){ showTab('learn'); });
+tabPractice.addEventListener('click', function(){ showTab('practice'); });
+
+/* ============================================================
+   PRACTICE
+   ============================================================ */
+var diff = 'easy';
+var cur = null, score = 0, streak = 0, best = 0, waiting = false;
+var probText = document.getElementById('probText');
+var qIn = document.getElementById('qIn');
+var rIn = document.getElementById('rIn');
+var checkBtn = document.getElementById('checkBtn');
+var msgEl = document.getElementById('msg');
+var explainEl = document.getElementById('explain');
+var practiceCard = document.getElementById('practiceCard');
+var confettiLayer = document.getElementById('confettiLayer');
+
+var diffBtns = document.querySelectorAll('[data-diff]');
+for (var db = 0; db < diffBtns.length; db++){
+  diffBtns[db].addEventListener('click', function(){
+    diff = this.getAttribute('data-diff');
+    for (var j = 0; j < diffBtns.length; j++) diffBtns[j].classList.remove('active');
+    this.classList.add('active');
+    newProblem();
+  });
+}
+
+function ri(a, b){ return a + Math.floor(Math.random() * (b - a + 1)); }
+
+function newProblem(){
+  var nMin, nMax, dMin, dMax;
+  if (diff === 'easy'){ nMin = 10; nMax = 99; dMin = 2; dMax = 9; }
+  else if (diff === 'medium'){ nMin = 100; nMax = 999; dMin = 2; dMax = 9; }
+  else { nMin = 100; nMax = 999; dMin = 11; dMax = 25; }
+  var n = ri(nMin, nMax), d = ri(dMin, dMax);
+  cur = { n:n, d:d, q:Math.floor(n / d), r:n % d };
+  probText.textContent = n + " ÷ " + d + " = ?";
+  qIn.value = ""; rIn.value = "";
+  msgEl.textContent = ""; explainEl.textContent = "";
+  waiting = false; checkBtn.disabled = false;
+}
+
+function updateStats(){
+  document.getElementById('score').textContent = score;
+  document.getElementById('streak').textContent = streak;
+  document.getElementById('best').textContent = best;
+}
+
+var PRAISE = ["Nice work!", "You nailed it!", "Division master!", "Brilliant!", "Super solving!", "Math wizard!"];
+
+function explainText(c){
+  var prod = c.d * c.q;
+  if (c.r === 0){
+    return c.n + " ÷ " + c.d + " = " + c.q + " remainder 0, because " + c.d + " × " + c.q + " = " + prod + ".";
+  }
+  return c.n + " ÷ " + c.d + " = " + c.q + " remainder " + c.r + ", because " +
+         c.d + " × " + c.q + " = " + prod + ", and " + prod + " + " + c.r + " = " + c.n + ".";
+}
+
+function check(){
+  if (waiting || !cur) return;
+  var qv = parseInt(qIn.value, 10), rv = parseInt(rIn.value, 10);
+  if (isNaN(qv) || isNaN(rv)){
+    msgEl.textContent = "Type a number in both boxes! ✏️";
+    explainEl.textContent = "";
+    return;
+  }
+  if (qv === cur.q && rv === cur.r){
+    waiting = true; checkBtn.disabled = true;
+    score++; streak++;
+    if (streak > best) best = streak;
+    ding();
+    practiceCard.classList.remove('flash-good');
+    void practiceCard.offsetWidth;
+    practiceCard.classList.add('flash-good');
+    if (streak % 5 === 0){
+      confettiBurst();
+      msgEl.textContent = "🔥 " + streak + " in a row! AMAZING! 🎉";
+    } else {
+      msgEl.textContent = PRAISE[Math.floor(Math.random() * PRAISE.length)] + " ⭐";
+    }
+    explainEl.textContent = explainText(cur);
+    updateStats();
+    setTimeout(newProblem, 1200);
+  } else {
+    practiceCard.classList.remove('shake');
+    void practiceCard.offsetWidth;
+    practiceCard.classList.add('shake');
+    streak = 0;
+    updateStats();
+    msgEl.textContent = "Not quite — good try! 💪";
+    explainEl.textContent = explainText(cur);
+  }
+}
+
+checkBtn.addEventListener('click', check);
+document.getElementById('newBtn').addEventListener('click', newProblem);
+qIn.addEventListener('keydown', function(e){ if (e.key === 'Enter') check(); });
+rIn.addEventListener('keydown', function(e){ if (e.key === 'Enter') check(); });
+
+/* ---------- confetti ---------- */
+function confettiBurst(){
+  var colors = ['#FF6B6B','#4ECDC4','#FFD93D','#9B5DE5','#00BBF9'];
+  for (var i = 0; i < 36; i++){
+    (function(i){
+      var p = document.createElement('div');
+      p.className = 'confetti';
+      p.style.left = '50%'; p.style.top = '40%';
+      p.style.background = colors[i % colors.length];
+      var ang = Math.random() * Math.PI * 2;
+      var dist = 80 + Math.random() * 170;
+      p.style.setProperty('--dx', (Math.cos(ang) * dist).toFixed(0) + 'px');
+      p.style.setProperty('--dy', (Math.sin(ang) * dist - 70).toFixed(0) + 'px');
+      confettiLayer.appendChild(p);
+      setTimeout(function(){ p.remove(); }, 1600);
+    })(i);
+  }
+}
+
+/* ---------- sound (WebAudio ding, Safari-safe) ---------- */
+var audioCtx = null, muted = false;
+var muteBtn = document.getElementById('muteBtn');
+function ding(){
+  if (muted) return;
+  try{
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    audioCtx = audioCtx || new AC();
+    if (audioCtx.state === 'suspended'){ audioCtx.resume(); }
+    var o = audioCtx.createOscillator();
+    var g = audioCtx.createGain();
+    o.connect(g); g.connect(audioCtx.destination);
+    o.type = 'sine';
+    o.frequency.value = 880;
+    var t = audioCtx.currentTime;
+    g.gain.setValueAtTime(0.001, t);
+    g.gain.exponentialRampToValueAtTime(0.4, t + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+    o.start(t);
+    o.stop(t + 0.55);
+  }catch(e){ /* silent — sound is optional */ }
+}
+muteBtn.addEventListener('click', function(){
+  muted = !muted;
+  muteBtn.textContent = muted ? "🔇" : "🔊";
+});
+
+/* ---------- init ---------- */
+renderLearn();
+newProblem();
+updateStats();
+</script>
+</body>
+</html>

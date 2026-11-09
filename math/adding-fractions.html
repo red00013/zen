@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fraction Fusion — Add &amp; Subtract Fractions</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: #FFF6E9;
+    color: #2D3142;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 16px 16px calc(24px + env(safe-area-inset-bottom));
+    min-height: 100vh;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 2rem; margin: 8px 0 2px; text-align: center; }
+  .tagline { text-align: center; margin: 0 0 12px; font-size: 1.05rem; opacity: .8; }
+
+  .chips { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px; }
+  .chip {
+    background: #fff; border-radius: 999px; padding: 10px 18px;
+    font-weight: 700; font-size: 1.05rem; min-height: 48px;
+    display: inline-flex; align-items: center; gap: 6px;
+    box-shadow: 0 2px 6px rgba(45,49,66,.08);
+  }
+  .chip .num { color: #FF6B6B; font-size: 1.2rem; }
+
+  .iconbtn {
+    background: #fff; border: 2px solid #4ECDC4; border-radius: 999px;
+    min-width: 52px; min-height: 52px; font-size: 1.4rem; cursor: pointer;
+  }
+  .iconbtn:active { transform: scale(.94); }
+
+  .diff-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .difflabel { align-self: center; font-weight: 700; }
+  .diffbtn {
+    border: 2px solid #4ECDC4; background: #fff; color: #2D3142;
+    border-radius: 999px; padding: 10px 22px; min-height: 52px;
+    font-size: 1.05rem; font-weight: 700; cursor: pointer;
+  }
+  .diffbtn.active { background: #4ECDC4; color: #fff; }
+
+  details.howto {
+    background: #fff; border-radius: 16px; padding: 6px 18px;
+    box-shadow: 0 2px 6px rgba(45,49,66,.08); margin-bottom: 14px;
+  }
+  details.howto summary {
+    cursor: pointer; font-weight: 800; font-size: 1.15rem;
+    padding: 14px 0; min-height: 52px; list-style: none;
+  }
+  details.howto summary::-webkit-details-marker { display: none; }
+  details.howto summary::before { content: "▶ "; color: #4ECDC4; }
+  details.howto[open] summary::before { content: "▼ "; }
+  details.howto ol { margin: 0 0 6px; padding-left: 22px; font-size: 1.05rem; line-height: 1.65; }
+  details.howto .example {
+    background: #FFF6E9; border-radius: 12px; padding: 10px 14px;
+    margin: 8px 0 14px; font-size: 1.05rem;
+  }
+
+  .card {
+    background: #fff; border-radius: 20px; padding: 22px;
+    box-shadow: 0 4px 14px rgba(45,49,66,.08); margin: 14px 0;
+  }
+  .problem {
+    text-align: center; font-size: 2.4rem; font-weight: 800; margin: 6px 0 4px;
+    display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
+  }
+  .problem .op { font-size: 2.2rem; }
+  .frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; }
+  .fnum { padding: 2px 14px; min-width: 44px; text-align: center; }
+  .fden { border-top: 4px solid #2D3142; padding: 2px 14px; min-width: 44px; text-align: center; }
+  .bigfrac { font-size: 2.4rem; }
+
+  .lcdbadge {
+    text-align: center; margin: 8px 0;
+  }
+  .lcdbadge span {
+    background: #FFD93D; border-radius: 999px; padding: 8px 20px;
+    font-weight: 800; font-size: 1.2rem; display: inline-block;
+  }
+
+  .dots { display: flex; gap: 10px; justify-content: center; margin: 14px 0 4px; }
+  .dot { width: 16px; height: 16px; border-radius: 50%; background: #EADFC8; }
+  .dot.on { background: #FF6B6B; }
+  .dot.done { background: #4ECDC4; }
+  .steplabel { text-align: center; font-weight: 800; font-size: 1.25rem; margin: 6px 0 12px; }
+
+  [hidden] { display: none !important; }
+
+  .stepcard { border: 2px dashed #EADFC8; border-radius: 16px; padding: 18px; margin-top: 6px; }
+  .stepwork { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; font-size: 2rem; font-weight: 800; margin: 10px 0 16px; }
+  .stepwork .op { font-size: 2rem; }
+
+  .num-input {
+    width: 88px; height: 68px; font-size: 2rem; font-weight: 800; text-align: center;
+    border: 3px solid #4ECDC4; border-radius: 14px; color: #2D3142; background: #fff;
+    -webkit-appearance: none; appearance: none;
+  }
+  .num-input:focus { outline: 3px solid #FFD93D; border-color: #4ECDC4; }
+  .fnum .num-input { border: none; border-radius: 0; padding: 0; }
+
+  .btnrow { display: flex; gap: 12px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  .btn {
+    border: none; border-radius: 16px; padding: 14px 30px; min-height: 56px;
+    font-size: 1.2rem; font-weight: 800; cursor: pointer; color: #fff;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn-primary { background: #FF6B6B; }
+  .btn-secondary { background: #4ECDC4; color: #2D3142; }
+  .btn-ghost {
+    background: #fff; color: #2D3142; border: 2px solid #4ECDC4;
+  }
+
+  .hintbtn { margin-top: 10px; }
+  .hintpanel {
+    margin-top: 12px; background: #FFF6E9; border-radius: 12px; padding: 14px;
+    font-size: 1.05rem;
+  }
+  .hintrow { margin: 6px 0; line-height: 2.1; }
+  .mult {
+    display: inline-block; min-width: 48px; min-height: 44px; line-height: 44px;
+    text-align: center; background: #fff; border-radius: 10px; margin: 2px 3px;
+    font-weight: 700; padding: 0 6px;
+  }
+  .mult.hit { background: #FFD93D; }
+
+  .fb { text-align: center; font-size: 1.15rem; font-weight: 700; min-height: 34px; margin-top: 12px; }
+  .fb.good { color: #1d9e6c; }
+  .fb.bad { color: #c94f4f; }
+
+  .shake { animation: shake .45s; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-10px); }
+    40% { transform: translateX(10px); }
+    60% { transform: translateX(-7px); }
+    80% { transform: translateX(7px); }
+  }
+  .flash { animation: flash .7s; }
+  @keyframes flash {
+    0% { background: #fff; }
+    30% { background: #d9f7e8; }
+    100% { background: #fff; }
+  }
+  .pop { animation: pop .6s; }
+  @keyframes pop {
+    0% { transform: scale(.3); opacity: 0; }
+    60% { transform: scale(1.25); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+
+  .celebrate { text-align: center; padding: 10px 0 4px; }
+  .celebrate .star { font-size: 4.5rem; display: inline-block; }
+  .celebrate h2 { margin: 8px 0; font-size: 1.6rem; }
+  .protip {
+    background: #FFF6E9; border-radius: 12px; padding: 14px 16px;
+    font-size: 1.1rem; margin: 12px 0; text-align: left; line-height: 1.6;
+  }
+  .worked {
+    background: #f4f1ea; border-radius: 12px; padding: 14px 16px;
+    font-size: 1.1rem; margin: 12px 0; text-align: left; line-height: 1.7;
+  }
+
+  .footer { text-align: center; margin-top: 6px; }
+  #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .home-btn{display:inline-flex;align-items:center;gap:6px;min-height:48px;padding:10px 20px;background:#FF6B6B;color:#fff;font-weight:700;font-size:1.05rem;text-decoration:none;border-radius:999px;box-shadow:0 2px 6px rgba(45,49,66,.15);font-family:inherit;}
+  .home-btn:active{transform:scale(.96);}
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div class="wrap">
+
+  <a class="home-btn" href="../">⌂ Home</a>
+  <h1>⚡ Fraction Fusion</h1>
+  <p class="tagline">Add &amp; subtract fractions like a pro!</p>
+
+  <div class="chips">
+    <span class="chip">Score <span class="num" id="score">0</span></span>
+    <span class="chip">🔥 Streak <span class="num" id="streak">0</span></span>
+    <span class="chip">⭐ Best <span class="num" id="best">0</span></span>
+    <button class="iconbtn" id="muteBtn" aria-label="Toggle sound" aria-pressed="false">🔊</button>
+  </div>
+
+  <div class="diff-row">
+    <span class="difflabel">Level:</span>
+    <button class="diffbtn" data-diff="easy">Easy</button>
+    <button class="diffbtn active" data-diff="medium">Medium</button>
+    <button class="diffbtn" data-diff="hard">Hard</button>
+  </div>
+
+  <details class="howto">
+    <summary>📖 How to play</summary>
+    <ol>
+      <li><b>Step 1 — Find the lowest common denominator.</b> What's the smallest number both bottom numbers fit into? Tap "multiples hint" if you need help!</li>
+      <li><b>Step 2 — Rewrite both fractions.</b> Give both fractions the new bottom number. (Whatever you multiply the bottom by, multiply the top by too!)</li>
+      <li><b>Step 3 — Add or subtract.</b> Combine the top numbers and keep the bottom. Any fraction equal to the right answer counts — it doesn't have to be simplified!</li>
+    </ol>
+    <div class="example">Example: 1/2 + 1/3 → LCD is 6 → 3/6 + 2/6 = <b>5/6</b> 🎉</div>
+  </details>
+
+  <div class="card">
+    <div class="problem" id="problemLine" aria-live="polite"></div>
+    <div class="lcdbadge" id="lcdBadge" hidden><span id="lcdBadgeText"></span></div>
+
+    <div class="dots" aria-hidden="true">
+      <span class="dot" id="dot1"></span>
+      <span class="dot" id="dot2"></span>
+      <span class="dot" id="dot3"></span>
+    </div>
+
+    <!-- STEP 1 -->
+    <section id="step1" class="stepcard" aria-label="Step 1">
+      <div class="steplabel">Step 1 of 3: Find the lowest common denominator</div>
+      <div class="stepwork">
+        <label class="sr" for="s1in">Lowest common denominator</label>
+        <input class="num-input" id="s1in" type="text" inputmode="numeric" pattern="[0-9]*"
+               autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Lowest common denominator">
+      </div>
+      <div class="btnrow">
+        <button class="btn btn-primary" id="check1">Check ✓</button>
+      </div>
+      <div class="btnrow hintbtn">
+        <button class="btn btn-ghost" id="hintBtn">🔍 Multiples hint</button>
+      </div>
+      <div class="hintpanel" id="hintPanel" hidden></div>
+      <div class="fb" id="fb1"></div>
+    </section>
+
+    <!-- STEP 2 -->
+    <section id="step2" class="stepcard" aria-label="Step 2" hidden>
+      <div class="steplabel">Step 2 of 3: Rewrite both fractions</div>
+      <div class="stepwork" id="step2work"></div>
+      <div class="btnrow">
+        <button class="btn btn-primary" id="check2">Check ✓</button>
+      </div>
+      <div class="fb" id="fb2"></div>
+    </section>
+
+    <!-- STEP 3 -->
+    <section id="step3" class="stepcard" aria-label="Step 3" hidden>
+      <div class="steplabel">Step 3 of 3: Add / subtract and write the answer</div>
+      <div class="stepwork">
+        <span class="frac bigfrac">
+          <span class="fnum">
+            <label class="sr" for="s3inN">Answer numerator</label>
+            <input class="num-input" id="s3inN" type="text" inputmode="numeric" pattern="[0-9]*"
+                   autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Answer numerator">
+          </span>
+          <span class="fden">
+            <label class="sr" for="s3inD">Answer denominator</label>
+            <input class="num-input" id="s3inD" type="text" inputmode="numeric" pattern="[0-9]*"
+                   autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Answer denominator">
+          </span>
+        </span>
+      </div>
+      <div class="btnrow">
+        <button class="btn btn-primary" id="check3">Check ✓</button>
+      </div>
+      <div class="fb" id="fb3"></div>
+    </section>
+
+    <!-- CELEBRATION -->
+    <div class="celebrate" id="celebrate" hidden>
+      <span class="star pop" id="celebrateStar">⭐</span>
+      <h2 id="celebrateMsg">You did it!</h2>
+      <div class="protip" id="protip"></div>
+      <div class="btnrow">
+        <button class="btn btn-primary" id="againBtn">New problem 🎲</button>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="btnrow">
+        <button class="btn btn-secondary" id="newBtn">New problem 🎲</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var S = {
+    n1: 0, d1: 0, n2: 0, d2: 0, op: "+",
+    lcd: 0, c1: 0, c2: 0, resNum: 0, resDen: 0,
+    step: 1, score: 0, streak: 0, best: 0,
+    diff: "medium", muted: false
+  };
+
+  /* ---------- math helpers ---------- */
+  function ri(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+  function gcd(a, b) {
+    a = Math.abs(a); b = Math.abs(b);
+    while (b) { var t = a % b; a = b; b = t; }
+    return a || 1;
+  }
+  function lcm(a, b) { return (a * b) / gcd(a, b); }
+
+  var ENCOURAGE = [
+    "Good try! Give it another shot 💪",
+    "Almost — check your work and try again!",
+    "No worries, mistakes help us learn 🌱",
+    "Keep going, you've got this! 🌟",
+    "Hmm, not quite. Take another look 👀"
+  ];
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  /* ---------- problem generation ---------- */
+  function genPair() {
+    for (var t = 0; t < 80; t++) {
+      var a, b, l;
+      if (S.diff === "easy") { a = ri(2, 8); b = ri(2, 8); }
+      else if (S.diff === "medium") { a = ri(2, 10); b = ri(2, 10); }
+      else { a = ri(2, 12); b = ri(2, 12); }
+      if (a === b) continue;
+      l = lcm(a, b);
+      if (S.diff === "easy") {
+        if (!(a % b === 0 || b % a === 0)) continue;   // one is a multiple of the other
+        return [a, b, l];
+      }
+      if (S.diff === "medium") {
+        if (l > 40) continue;
+        if ((a % b === 0 || b % a === 0) && t < 40) continue; // prefer real LCD hunting
+        return [a, b, l];
+      }
+      if (l > 60) continue;
+      if ((a % b === 0 || b % a === 0) && t < 40) continue;
+      return [a, b, l];
+    }
+    return [2, 4, 4];
+  }
+
+  function genProblem() {
+    for (var t = 0; t < 60; t++) {
+      var p = genPair();
+      var d1 = p[0], d2 = p[1], l = p[2];
+      var n1 = ri(1, d1 - 1), n2 = ri(1, d2 - 1);
+      var op = Math.random() < 0.5 ? "+" : "−";
+      if (op === "−") {
+        // put the bigger fraction first so the answer is never negative
+        if (n1 * d2 < n2 * d1) {
+          var tn = n1, td = d1; n1 = n2; d1 = d2; n2 = tn; d2 = td;
+        }
+        if (n1 * d2 === n2 * d1) continue; // avoid a zero answer
+      }
+      var c1 = (l / d1) * n1;
+      var c2 = (l / d2) * n2;
+      var rn = (op === "+") ? c1 + c2 : c1 - c2;
+      if (rn <= 0) continue;
+      S.n1 = n1; S.d1 = d1; S.n2 = n2; S.d2 = d2; S.op = op;
+      S.lcd = l; S.c1 = c1; S.c2 = c2; S.resNum = rn; S.resDen = l;
+      return;
+    }
+    // fallback, should never happen
+    S.n1 = 1; S.d1 = 2; S.n2 = 1; S.d2 = 4; S.op = "+";
+    S.lcd = 4; S.c1 = 2; S.c2 = 1; S.resNum = 3; S.resDen = 4;
+  }
+
+  /* ---------- rendering ---------- */
+  function fracHTML(n, d) {
+    return '<span class="frac bigfrac"><span class="fnum">' + n +
+           '</span><span class="fden">' + d + "</span></span>";
+  }
+  function $(id) { return document.getElementById(id); }
+
+  function renderProblem() {
+    $("problemLine").innerHTML =
+      fracHTML(S.n1, S.d1) +
+      '<span class="op">' + S.op + "</span>" +
+      fracHTML(S.n2, S.d2) +
+      '<span class="op">= ?</span>';
+    // step 2 work area: ?/LCD [op] ?/LCD with numerator inputs
+    $("step2work").innerHTML =
+      '<span class="frac bigfrac"><span class="fnum">' +
+      '<label class="sr" for="s2in1">First rewritten numerator</label>' +
+      '<input class="num-input" id="s2in1" type="text" inputmode="numeric" pattern="[0-9]*" ' +
+      'autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="First rewritten numerator">' +
+      '</span><span class="fden">' + S.lcd + "</span></span>" +
+      '<span class="op">' + S.op + "</span>" +
+      '<span class="frac bigfrac"><span class="fnum">' +
+      '<label class="sr" for="s2in2">Second rewritten numerator</label>' +
+      '<input class="num-input" id="s2in2" type="text" inputmode="numeric" pattern="[0-9]*" ' +
+      'autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Second rewritten numerator">' +
+      '</span><span class="fden">' + S.lcd + "</span></span>";
+    wireStep2Inputs();
+    $("lcdBadge").hidden = true;
+    $("hintPanel").hidden = true;
+    $("hintBtn").textContent = "🔍 Multiples hint";
+    ["s1in", "s3inN", "s3inD"].forEach(function (id) { $(id).value = ""; });
+    ["fb1", "fb2", "fb3"].forEach(function (id) { $(id).textContent = ""; $(id).className = "fb"; });
+  }
+
+  function showStep(n) {
+    advancing = false;
+    S.step = n;
+    $("step1").hidden = n !== 1;
+    $("step2").hidden = n !== 2;
+    $("step3").hidden = n !== 3;
+    $("celebrate").hidden = true;
+    $("dot1").className = "dot" + (n > 1 ? " done" : (n === 1 ? " on" : ""));
+    $("dot2").className = "dot" + (n > 2 ? " done" : (n === 2 ? " on" : ""));
+    $("dot3").className = "dot" + (n === 3 ? " on" : "");
+  }
+
+  function renderChips() {
+    $("score").textContent = S.score;
+    $("streak").textContent = S.streak;
+    $("best").textContent = S.best;
+  }
+
+  function newProblem() {
+    genProblem();
+    renderProblem();
+    showStep(1);
+  }
+
+  /* ---------- input helpers ---------- */
+  function readInt(id) {
+    var el = $(id);
+    var v = el.value.replace(/[^0-9]/g, "");
+    el.value = v;
+    return v === "" ? NaN : parseInt(v, 10);
+  }
+  function sanitizeLive(input) {
+    input.addEventListener("input", function () {
+      var v = input.value.replace(/[^0-9]/g, "");
+      if (v !== input.value) input.value = v;
+    });
+  }
+  function enterToCheck(input, fn) {
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { e.preventDefault(); fn(); }
+    });
+  }
+  function wireStaticInputs() {
+    [["s1in", checkStep1], ["s3inN", checkStep3], ["s3inD", checkStep3]].forEach(function (pair) {
+      var el = $(pair[0]);
+      sanitizeLive(el);
+      enterToCheck(el, pair[1]);
+    });
+  }
+  function wireStep2Inputs() {
+    [["s2in1", checkStep2], ["s2in2", checkStep2]].forEach(function (pair) {
+      var el = $(pair[0]);
+      if (el) { sanitizeLive(el); enterToCheck(el, pair[1]); }
+    });
+  }
+
+  /* ---------- feedback ---------- */
+  function setFb(id, msg, good) {
+    var el = $(id);
+    el.textContent = msg;
+    el.className = "fb " + (good ? "good" : "bad");
+  }
+  function shakeCard(card) {
+    card.classList.remove("shake");
+    void card.offsetWidth;
+    card.classList.add("shake");
+  }
+  function flashCard(card) {
+    card.classList.remove("flash");
+    void card.offsetWidth;
+    card.classList.add("flash");
+  }
+  function resetStreak() {
+    S.streak = 0;
+    renderChips();
+  }
+
+  var advancing = false;
+  function stepCorrect(cardId, fbId, msg) {
+    if (advancing) return;
+    advancing = true;
+    var card = $(cardId);
+    flashCard(card);
+    ding();
+    S.score += 10;
+    renderChips();
+    setFb(fbId, msg, true);
+    setTimeout(function () {
+      if (S.step === 1) {
+        $("lcdBadgeText").textContent = "LCD = " + S.lcd + " ✅";
+        $("lcdBadge").hidden = false;
+        showStep(2);
+      } else if (S.step === 2) {
+        showStep(3);
+      }
+    }, 750);
+  }
+
+  function stepWrong(cardId, fbId) {
+    shakeCard($(cardId));
+    boop();
+    resetStreak();
+    setFb(fbId, pick(ENCOURAGE), false);
+  }
+
+  /* ---------- step checks ---------- */
+  function checkStep1() {
+    var v = readInt("s1in");
+    if (isNaN(v)) { setFb("fb1", "Type a number first! 🔢", false); return; }
+    if (v === S.lcd) {
+      stepCorrect("step1", "fb1", "Nice! The LCD is " + S.lcd + " ✅");
+    } else {
+      stepWrong("step1", "fb1");
+    }
+  }
+
+  function checkStep2() {
+    var a = readInt("s2in1"), b = readInt("s2in2");
+    if (isNaN(a) || isNaN(b)) { setFb("fb2", "Fill in both top numbers! 🔢", false); return; }
+    if (a === S.c1 && b === S.c2) {
+      stepCorrect("step2", "fb2",
+        "Perfect! " + S.c1 + "/" + S.lcd + " " + S.op + " " + S.c2 + "/" + S.lcd + " ✅");
+    } else {
+      stepWrong("step2", "fb2");
+    }
+  }
+
+  function checkStep3() {
+    var n = readInt("s3inN"), d = readInt("s3inD");
+    if (isNaN(n) || isNaN(d)) { setFb("fb3", "Fill in both numbers! 🔢", false); return; }
+    if (d === 0) { setFb("fb3", "The bottom number can't be 0! 🚫", false); return; }
+    // accept ANY equivalent fraction via cross-multiplication
+    if (n * S.resDen === S.resNum * d) {
+      completeProblem();
+    } else {
+      stepWrong("step3", "fb3");
+      showWorked();
+    }
+  }
+
+  function simplest() {
+    var g = gcd(S.resNum, S.resDen);
+    return { n: S.resNum / g, d: S.resDen / g };
+  }
+
+  function proTipText() {
+    var s = simplest();
+    var t = "🎓 Pro tip: " + S.resNum + "/" + S.resDen;
+    if (s.d === 1) {
+      t += " = " + s.n + " — a whole number!";
+    } else if (s.n !== S.resNum || s.d !== S.resDen) {
+      t += " simplifies to " + s.n + "/" + s.d + ".";
+    } else {
+      return t + " is already in simplest form! ⭐";
+    }
+    if (s.d !== 1 && s.n > s.d) {
+      var w = Math.floor(s.n / s.d), r = s.n % s.d;
+      if (r > 0) t += " As a mixed number that's " + w + " " + r + "/" + s.d + ".";
+      else t += " That's the whole number " + w + ".";
+    }
+    return t;
+  }
+
+  function workedText() {
+    var s = simplest();
+    var t = "The right answer: LCD = " + S.lcd + " → " +
+            S.c1 + "/" + S.lcd + " " + S.op + " " + S.c2 + "/" + S.lcd +
+            " = " + S.resNum + "/" + S.resDen;
+    if (s.n !== S.resNum || s.d !== S.resDen) {
+      t += " → simplest form " + s.n + "/" + s.d;
+    }
+    return t + ".";
+  }
+
+  function showWorked() {
+    var fb = $("fb3");
+    var div = document.createElement("div");
+    div.className = "worked";
+    div.textContent = workedText();
+    fb.appendChild(div);
+  }
+
+  function completeProblem() {
+    if (!$("celebrate").hidden) return; // already completed — ignore double taps
+    var card = $("step3");
+    flashCard(card);
+    ding();
+    S.score += 30;
+    S.streak += 1;
+    if (S.streak > S.best) S.best = S.streak;
+    renderChips();
+    $("step1").hidden = true;
+    $("step2").hidden = true;
+    $("step3").hidden = true;
+    $("dot1").className = "dot done";
+    $("dot2").className = "dot done";
+    $("dot3").className = "dot done";
+    $("celebrateMsg").textContent =
+      S.streak >= 2 ? "You did it! 🔥 " + S.streak + "-problem streak!" : "You did it! 🎉";
+    $("protip").textContent = proTipText();
+    $("celebrate").hidden = false;
+    var star = $("celebrateStar");
+    star.classList.remove("pop");
+    void star.offsetWidth;
+    star.classList.add("pop");
+    if (S.streak > 0 && S.streak % 5 === 0) launchConfetti();
+  }
+
+  /* ---------- multiples hint ---------- */
+  function buildHint() {
+    var panel = $("hintPanel");
+    function chips(d, otherSet) {
+      var html = "";
+      for (var i = 1; i <= 8; i++) {
+        var m = d * i;
+        html += '<span class="mult' + (otherSet[m] ? " hit" : "") + '">' + m + "</span>";
+      }
+      return html;
+    }
+    var set1 = {}, set2 = {}, i;
+    for (i = 1; i <= 8; i++) { set1[S.d1 * i] = 1; set2[S.d2 * i] = 1; }
+    panel.innerHTML =
+      '<div class="hintrow">Multiples of <b>' + S.d1 + "</b>: " + chips(S.d1, set2) + "</div>" +
+      '<div class="hintrow">Multiples of <b>' + S.d2 + "</b>: " + chips(S.d2, set1) + "</div>" +
+      '<div class="hintrow">💡 The <b>yellow</b> numbers appear in both lists. The smallest one is the LCD!</div>';
+  }
+
+  /* ---------- sound ---------- */
+  var actx = null;
+  function tone(freq, t0, dur, vol) {
+    var o = actx.createOscillator();
+    var g = actx.createGain();
+    o.type = "sine";
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(vol, t0 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g);
+    g.connect(actx.destination);
+    o.start(t0);
+    o.stop(t0 + dur + 0.05);
+  }
+  function ensureAudio() {
+    if (!actx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      actx = new AC();
+    }
+    if (actx.state === "suspended") actx.resume();
+  }
+  function ding() {
+    if (S.muted) return;
+    try {
+      ensureAudio();
+      var t = actx.currentTime;
+      tone(660, t, 0.18, 0.4);
+      tone(880, t + 0.12, 0.3, 0.4);
+    } catch (e) { /* audio unavailable — stay silent */ }
+  }
+  function boop() {
+    if (S.muted) return;
+    try {
+      ensureAudio();
+      tone(220, actx.currentTime, 0.25, 0.25);
+    } catch (e) { /* audio unavailable — stay silent */ }
+  }
+
+  /* ---------- confetti ---------- */
+  var cCanvas = null, cCtx = null, pieces = [], cRunning = false;
+  var COLORS = ["#FF6B6B", "#4ECDC4", "#FFD93D", "#2D3142", "#ffffff"];
+  function launchConfetti() {
+    try {
+      cCanvas = $("confetti");
+      cCtx = cCanvas.getContext("2d");
+      cCanvas.width = window.innerWidth;
+      cCanvas.height = window.innerHeight;
+      for (var i = 0; i < 120; i++) {
+        pieces.push({
+          x: Math.random() * cCanvas.width,
+          y: -20 - Math.random() * cCanvas.height * 0.3,
+          w: 6 + Math.random() * 6,
+          h: 8 + Math.random() * 8,
+          c: COLORS[i % COLORS.length],
+          vy: 2 + Math.random() * 3,
+          vx: -1.5 + Math.random() * 3,
+          r: Math.random() * Math.PI,
+          vr: -0.1 + Math.random() * 0.2
+        });
+      }
+      if (!cRunning) { cRunning = true; requestAnimationFrame(confettiTick); }
+      setTimeout(function () { pieces = []; }, 3000);
+    } catch (e) { /* canvas unavailable */ }
+  }
+  function confettiTick() {
+    if (!cRunning) return;
+    cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+    var alive = [];
+    for (var i = 0; i < pieces.length; i++) {
+      var p = pieces[i];
+      p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      if (p.y < cCanvas.height + 30) {
+        alive.push(p);
+        cCtx.save();
+        cCtx.translate(p.x, p.y);
+        cCtx.rotate(p.r);
+        cCtx.fillStyle = p.c;
+        cCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        cCtx.restore();
+      }
+    }
+    pieces = alive;
+    if (pieces.length > 0) {
+      requestAnimationFrame(confettiTick);
+    } else {
+      cRunning = false;
+      cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+    }
+  }
+
+  /* ---------- wiring ---------- */
+  $("check1").addEventListener("click", checkStep1);
+  $("check2").addEventListener("click", checkStep2);
+  $("check3").addEventListener("click", checkStep3);
+  $("newBtn").addEventListener("click", newProblem);
+  $("againBtn").addEventListener("click", newProblem);
+
+  $("hintBtn").addEventListener("click", function () {
+    var panel = $("hintPanel");
+    if (panel.hidden) { buildHint(); panel.hidden = false; this.textContent = "🙈 Hide hint"; }
+    else { panel.hidden = true; this.textContent = "🔍 Multiples hint"; }
+  });
+
+  $("muteBtn").addEventListener("click", function () {
+    S.muted = !S.muted;
+    this.textContent = S.muted ? "🔇" : "🔊";
+    this.setAttribute("aria-pressed", S.muted ? "true" : "false");
+  });
+
+  var diffBtns = document.querySelectorAll(".diffbtn");
+  for (var i = 0; i < diffBtns.length; i++) {
+    diffBtns[i].addEventListener("click", function () {
+      for (var j = 0; j < diffBtns.length; j++) diffBtns[j].classList.remove("active");
+      this.classList.add("active");
+      S.diff = this.getAttribute("data-diff");
+      newProblem();
+    });
+  }
+
+  wireStaticInputs();
+  renderChips();
+  newProblem();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Fraction Flip 🍕</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:#FFF6E9;color:#2D3142;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+    min-height:100vh;display:flex;justify-content:center;
+    padding:14px 14px 44px;-webkit-text-size-adjust:100%;
+  }
+  .wrap{width:100%;max-width:680px;}
+
+  header{display:flex;align-items:center;justify-content:space-between;margin:4px 0 12px;}
+  h1{font-size:1.9rem;margin:0;}
+  .icon-btn{
+    min-width:54px;min-height:54px;font-size:1.5rem;background:#fff;border:none;border-radius:16px;
+    box-shadow:0 2px 6px rgba(45,49,66,.12);touch-action:manipulation;user-select:none;-webkit-user-select:none;
+  }
+  .icon-btn:active{transform:scale(.94);}
+
+  .hud{display:flex;margin:0 0 12px;}
+  .pill{
+    margin-right:8px;background:#fff;border-radius:999px;padding:10px 16px;
+    font-weight:800;font-size:1.05rem;box-shadow:0 2px 6px rgba(45,49,66,.08);
+    user-select:none;-webkit-user-select:none;
+  }
+
+  details.howto{background:#fff;border-radius:18px;margin:0 0 4px;box-shadow:0 2px 6px rgba(45,49,66,.08);}
+  details.howto summary{
+    min-height:52px;display:flex;align-items:center;padding:0 18px;
+    font-weight:800;font-size:1.05rem;cursor:pointer;list-style:none;touch-action:manipulation;
+  }
+  details.howto summary::-webkit-details-marker{display:none;}
+  details.howto summary::after{content:'▾';margin-left:auto;color:#FF6B6B;font-size:1.3rem;}
+  details[open].howto summary::after{content:'▴';}
+  details.howto p{margin:0;padding:0 18px 16px;font-size:1.05rem;line-height:1.55;color:#5C6170;}
+
+  .seg-ctl{display:flex;background:#EFE6D3;border-radius:20px;padding:6px;margin:12px 0 0;}
+  .seg-btn{
+    flex:1;min-height:54px;margin:0 3px;border:none;border-radius:14px;background:transparent;
+    font-size:1.05rem;font-weight:800;color:#8A8474;touch-action:manipulation;
+    user-select:none;-webkit-user-select:none;font-family:inherit;
+  }
+  .seg-btn.active{background:#fff;color:#2D3142;box-shadow:0 2px 8px rgba(45,49,66,.18);}
+  .seg-btn:active{transform:scale(.97);}
+  .seg-ctl.small .seg-btn{min-height:50px;font-size:1rem;}
+
+  .card{
+    background:#fff;border-radius:24px;padding:22px 18px;margin-top:12px;
+    box-shadow:0 4px 16px rgba(45,49,66,.10);border:4px solid transparent;
+  }
+  .card.correct{border-color:#3ECF6F;box-shadow:0 0 0 6px rgba(62,207,111,.25);}
+  .card.shake{animation:shake .45s ease;border-color:#FF6B6B;}
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    20%{transform:translateX(-10px);}40%{transform:translateX(10px);}
+    60%{transform:translateX(-6px);}80%{transform:translateX(6px);}
+  }
+
+  .prompt{text-align:center;font-size:1.25rem;font-weight:700;margin:12px 0 4px;}
+  .big-math{text-align:center;font-size:2.8rem;font-weight:800;margin:8px 0;line-height:1.2;}
+  .frac{display:inline-flex;flex-direction:column;align-items:center;line-height:1.2;vertical-align:middle;}
+  .frac .den{border-top:4px solid #2D3142;padding-top:3px;}
+  .big-math.mixed .whole-num{margin-right:14px;}
+
+  .bars{display:flex;flex-wrap:wrap;justify-content:center;margin:12px 0 4px;}
+  .bar{display:flex;border:3px solid #2D3142;border-radius:10px;overflow:hidden;background:#fff;margin:5px;}
+  .seg{border-right:2px solid #2D3142;}
+  .seg:last-child{border-right:none;}
+  .seg.on{background:#4ECDC4;}
+  .seg.off{background:#fff;}
+
+  .answer-row{display:flex;align-items:center;justify-content:center;margin:18px 0 6px;}
+  .answer-row .num-input{margin:0 6px;}
+  .num-input{
+    width:88px;min-height:68px;font-size:2rem;font-weight:800;text-align:center;color:#2D3142;
+    border:3px solid #D9D0BA;border-radius:16px;background:#FFFDF7;padding:4px;font-family:inherit;
+  }
+  .num-input:focus{outline:none;border-color:#4ECDC4;box-shadow:0 0 0 4px rgba(78,205,196,.25);}
+  .num-input::placeholder{color:#C9C0A8;}
+
+  .feedback{min-height:66px;font-size:1.2rem;font-weight:700;text-align:center;margin:10px 0 4px;line-height:1.45;}
+  .feedback.good{color:#1E9E50;animation:pop .35s ease;}
+  .feedback.bad{color:#C0392B;}
+  .feedback.hint{color:#8A8474;}
+  @keyframes pop{0%{transform:scale(.7);}60%{transform:scale(1.12);}100%{transform:scale(1);}}
+
+  .btn{
+    display:block;width:100%;min-height:56px;margin-top:12px;border:none;border-radius:18px;
+    font-size:1.25rem;font-weight:800;color:#fff;touch-action:manipulation;
+    user-select:none;-webkit-user-select:none;font-family:inherit;
+  }
+  .btn.primary{background:#FF6B6B;box-shadow:0 4px 0 #D94F4F;}
+  .btn.secondary{background:#4ECDC4;box-shadow:0 4px 0 #35A8A0;}
+  .btn:active{transform:translateY(3px);box-shadow:none;}
+
+  .foot{text-align:center;color:#8A8474;margin-top:16px;font-size:.95rem;}
+
+  #confetti{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;overflow:hidden;z-index:50;}
+  .confetti-piece{position:absolute;top:-16px;width:10px;height:16px;border-radius:2px;animation:cfall 1.9s ease-in forwards;}
+  @keyframes cfall{to{transform:translateY(110vh) rotate(720deg);}}
+  .home-btn{display:inline-flex;align-items:center;gap:6px;min-height:48px;padding:10px 20px;background:#FF6B6B;color:#fff;font-weight:700;font-size:1.05rem;text-decoration:none;border-radius:999px;box-shadow:0 2px 6px rgba(45,49,66,.15);font-family:inherit;}
+  .home-btn:active{transform:scale(.96);}
+</style>
+</head>
+<body>
+<div id="confetti" aria-hidden="true"></div>
+<div class="wrap">
+  <a class="home-btn" href="../">⌂ Home</a>
+  <header>
+    <h1>Fraction Flip 🍕</h1>
+    <button id="muteBtn" class="icon-btn" aria-label="Mute sound">🔊</button>
+  </header>
+
+  <div class="hud">
+    <div class="pill">⭐ <span id="score">0</span></div>
+    <div class="pill">🔥 <span id="streak">0</span></div>
+    <div class="pill">🏆 <span id="best">0</span></div>
+  </div>
+
+  <details class="howto">
+    <summary>How to play ❓</summary>
+    <p id="howto"></p>
+  </details>
+
+  <div class="seg-ctl" id="modeToggle" aria-label="Game mode">
+    <button class="seg-btn active" data-val="i2m">Improper → Mixed</button>
+    <button class="seg-btn" data-val="m2i">Mixed → Improper</button>
+  </div>
+
+  <div class="seg-ctl small" id="diffToggle" aria-label="Difficulty">
+    <button class="seg-btn active" data-val="easy">Easy</button>
+    <button class="seg-btn" data-val="medium">Medium</button>
+    <button class="seg-btn" data-val="hard">Hard</button>
+  </div>
+
+  <div class="card" id="card">
+    <div id="question"></div>
+    <div class="feedback" id="feedback" aria-live="polite"></div>
+    <button class="btn primary" id="checkBtn">Check ✅</button>
+    <button class="btn secondary" id="newBtn">New problem 🔀</button>
+  </div>
+
+  <p class="foot">Made for Zen 🧮</p>
+</div>
+<script>
+(function(){
+'use strict';
+
+var state = {
+  mode:'i2m', diff:'easy',
+  n:0, d:1, whole:0, rem:0,
+  score:0, streak:0, best:0,
+  locked:false, timer:null, muted:false, audioCtx:null
+};
+
+try {
+  var saved = parseInt(localStorage.getItem('ff_best') || '0', 10);
+  state.best = isNaN(saved) ? 0 : saved;
+} catch(e){ state.best = 0; }
+
+var PRAISE = ['Nice work! 🎉','You got it! ⭐','Super! 🌟','Math wizard! 🧙','Boom! 💥','Brilliant! ✨'];
+var DIFFS = {
+  easy:   { dMin:2, dMax:5,  wMax:3 },
+  medium: { dMin:2, dMax:8,  wMax:4 },
+  hard:   { dMin:2, dMax:12, wMax:4 }
+};
+
+function $(id){ return document.getElementById(id); }
+function rand(a,b){ return Math.floor(Math.random()*(b-a+1)) + a; }
+function clearTimer(){ if(state.timer){ clearTimeout(state.timer); state.timer = null; } }
+
+/* ---- sound: tiny WebAudio "ding", wrapped safely ---- */
+function ding(){
+  if(state.muted) return;
+  try{
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return;
+    if(!state.audioCtx){ state.audioCtx = new AC(); }
+    if(state.audioCtx.state === 'suspended'){ state.audioCtx.resume(); }
+    var t = state.audioCtx.currentTime;
+    var o = state.audioCtx.createOscillator();
+    var g = state.audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(880, t);
+    o.frequency.setValueAtTime(1318.51, t + 0.12);
+    g.gain.setValueAtTime(0.22, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+    o.connect(g); g.connect(state.audioCtx.destination);
+    o.start(t); o.stop(t + 0.55);
+  }catch(e){}
+}
+
+/* ---- confetti burst (every 5-streak) ---- */
+function confetti(){
+  try{
+    var c = $('confetti');
+    var colors = ['#FF6B6B','#4ECDC4','#FFD93D','#9B5DE5','#F15BB5'];
+    for(var i=0;i<48;i++){
+      var p = document.createElement('div');
+      p.className = 'confetti-piece';
+      p.style.left = (Math.random()*100) + '%';
+      p.style.background = colors[i % colors.length];
+      p.style.animationDelay = (Math.random()*0.35) + 's';
+      c.appendChild(p);
+      (function(el){
+        setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 2300);
+      })(p);
+    }
+  }catch(e){}
+}
+
+/* ---- problem generation ----
+   whole = Math.floor(n/d), rem = n % d.
+   r is always 1..d-1, so every fraction is truly improper with a remainder. */
+function newProblem(){
+  clearTimer();
+  state.locked = false;
+  var cfg = DIFFS[state.diff];
+  var d = rand(cfg.dMin, cfg.dMax);
+  var whole = rand(1, cfg.wMax);
+  var r = rand(1, d - 1);
+  state.d = d;
+  state.whole = whole;
+  state.rem = r;
+  state.n = whole * d + r;
+  render();
+}
+
+/* ---- bar visual: ceil(n/d) bars, d segments each, n shaded ---- */
+function buildBars(n, d){
+  var barsNeeded = Math.ceil(n / d);
+  var s = d <= 6 ? 32 : (d <= 8 ? 28 : 22);
+  var html = '<div class="bars" role="img" aria-label="' + n + ' shaded pieces in bars of ' + d + '">';
+  var shaded = 0;
+  for(var b=0; b<barsNeeded; b++){
+    html += '<div class="bar">';
+    for(var i=0; i<d; i++){
+      var on = shaded < n;
+      html += '<div class="seg ' + (on ? 'on' : 'off') + '" style="width:' + s + 'px;height:' + s + 'px"></div>';
+      if(on) shaded++;
+    }
+    html += '</div>';
+  }
+  return html + '</div>';
+}
+
+function fracHTML(top, den){
+  return '<span class="frac"><span>' + top + '</span><span class="den">' + den + '</span></span>';
+}
+
+function numInput(id, label){
+  return '<input id="' + id + '" class="num-input" type="text" inputmode="numeric" pattern="[0-9]*" ' +
+         'autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="3" ' +
+         'placeholder="?" aria-label="' + label + '">';
+}
+
+function render(){
+  var card = $('card');
+  card.classList.remove('correct');
+  card.classList.remove('shake');
+  var fb = $('feedback');
+  fb.textContent = '';
+  fb.className = 'feedback';
+
+  var bars = buildBars(state.n, state.d);
+
+  if(state.mode === 'i2m'){
+    $('question').innerHTML =
+      '<div class="big-math">' + fracHTML(state.n, state.d) + '</div>' +
+      '<p class="prompt">Turn it into a mixed number! 👇</p>' + bars +
+      '<div class="answer-row">' +
+        numInput('inWhole', 'Whole number') +
+        fracHTML(numInput('inNum', 'Numerator'), state.d) +
+      '</div>';
+    $('howto').textContent = "Count the fully shaded bars — that is your whole number. " +
+      "Then count the shaded pieces in the last bar — that is the new top number. " +
+      "The bottom number stays " + state.d + ". Type your answer and tap Check!";
+  } else {
+    $('question').innerHTML =
+      '<div class="big-math mixed"><span class="whole-num">' + state.whole + '</span>' +
+        fracHTML(state.rem, state.d) + '</div>' +
+      '<p class="prompt">Turn it into an improper fraction! 👇</p>' + bars +
+      '<div class="answer-row">' +
+        fracHTML(numInput('inNum', 'Numerator'), state.d) +
+      '</div>';
+    $('howto').textContent = "Multiply the whole number by the bottom number, then add the top number " +
+      "(" + state.whole + " × " + state.d + " + " + state.rem + " = ?). " +
+      "That is your new top number. The bottom number stays " + state.d + ".";
+  }
+
+  bindInputs();
+  updateHud();
+}
+
+function bindInputs(){
+  var ids = ['inWhole', 'inNum'];
+  for(var k=0; k<ids.length; k++){
+    var el = $(ids[k]);
+    if(!el) continue;
+    el.addEventListener('input', function(){ this.value = this.value.replace(/[^0-9]/g,'').slice(0,3); });
+    el.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); check(); } });
+  }
+}
+
+function getVal(id){
+  var el = $(id);
+  if(!el || el.value === '') return null;
+  return parseInt(el.value, 10);
+}
+
+function say(text, cls){
+  var fb = $('feedback');
+  fb.className = 'feedback';
+  void fb.offsetWidth; /* restart pop animation */
+  fb.className = 'feedback ' + cls;
+  fb.textContent = text;
+}
+
+function check(){
+  if(state.locked) return;
+  var ok;
+  if(state.mode === 'i2m'){
+    var w = getVal('inWhole'), r = getVal('inNum');
+    if(w === null || r === null){ say('Type both numbers first! ✏️', 'hint'); return; }
+    ok = (w === state.whole && r === state.rem);
+  } else {
+    var x = getVal('inNum');
+    if(x === null){ say('Type the top number first! ✏️', 'hint'); return; }
+    ok = (x === state.n);
+  }
+  if(ok) onCorrect(); else onWrong();
+}
+
+function onCorrect(){
+  state.locked = true;
+  state.score++;
+  state.streak++;
+  if(state.streak > state.best){
+    state.best = state.streak;
+    try{ localStorage.setItem('ff_best', String(state.best)); }catch(e){}
+  }
+  updateHud();
+
+  var card = $('card');
+  card.classList.remove('shake');
+  void card.offsetWidth;
+  card.classList.add('correct');
+
+  ding();
+  say(PRAISE[rand(0, PRAISE.length-1)] + '  Streak: ' + state.streak + ' 🔥', 'good');
+  if(state.streak % 5 === 0) confetti();
+
+  clearTimer();
+  state.timer = setTimeout(function(){ newProblem(); }, 1200);
+}
+
+function onWrong(){
+  state.streak = 0;
+  updateHud();
+
+  var card = $('card');
+  card.classList.remove('correct');
+  card.classList.remove('shake');
+  void card.offsetWidth;
+  card.classList.add('shake');
+
+  var exp;
+  if(state.mode === 'i2m'){
+    exp = 'Not quite! ' + state.n + ' ÷ ' + state.d + ' = ' + state.whole +
+          ' remainder ' + state.rem + ', so ' + state.n + '/' + state.d +
+          ' = ' + state.whole + ' ' + state.rem + '/' + state.d + '. Try again! 💪';
+  } else {
+    exp = 'Not quite! ' + state.whole + ' × ' + state.d + ' + ' + state.rem +
+          ' = ' + state.n + ', so ' + state.whole + ' ' + state.rem + '/' + state.d +
+          ' = ' + state.n + '/' + state.d + '. Try again! 💪';
+  }
+  say(exp, 'bad');
+}
+
+function updateHud(){
+  $('score').textContent = state.score;
+  $('streak').textContent = state.streak;
+  $('best').textContent = state.best;
+}
+
+function segSet(id, val){
+  var btns = $(id).getElementsByTagName('button');
+  for(var i=0; i<btns.length; i++){
+    if(btns[i].getAttribute('data-val') === val) btns[i].classList.add('active');
+    else btns[i].classList.remove('active');
+  }
+}
+
+function setMode(m){
+  if(state.mode === m) return;
+  state.mode = m;
+  segSet('modeToggle', m);
+  newProblem();
+}
+
+function setDiff(v){
+  if(state.diff === v) return;
+  state.diff = v;
+  segSet('diffToggle', v);
+  newProblem();
+}
+
+function init(){
+  var mb = $('modeToggle').getElementsByTagName('button');
+  for(var i=0; i<mb.length; i++){
+    (function(btn){
+      btn.addEventListener('click', function(){ setMode(btn.getAttribute('data-val')); });
+    })(mb[i]);
+  }
+  var db = $('diffToggle').getElementsByTagName('button');
+  for(var j=0; j<db.length; j++){
+    (function(btn){
+      btn.addEventListener('click', function(){ setDiff(btn.getAttribute('data-val')); });
+    })(db[j]);
+  }
+  $('checkBtn').addEventListener('click', check);
+  $('newBtn').addEventListener('click', function(){ newProblem(); });
+  $('muteBtn').addEventListener('click', function(){
+    state.muted = !state.muted;
+    this.textContent = state.muted ? '🔇' : '🔊';
+    this.setAttribute('aria-label', state.muted ? 'Unmute sound' : 'Mute sound');
+  });
+  newProblem();
+}
+
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+
+})();
+</script>
+</body>
+</html>

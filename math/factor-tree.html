@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>🕵️ Factor Tree Detective</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0 auto;
+    max-width: 940px;
+    padding: 12px 16px 48px;
+    background: #FFF6E9;
+    color: #2D3142;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    touch-action: manipulation;
+  }
+  h1 { font-size: 2rem; margin: 0.5rem 0 0.15rem; text-align: center; }
+  .subtitle { text-align: center; color: #7a7e8f; margin: 0 0 0.5rem; font-size: 1.05rem; }
+
+  .card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 16px;
+    margin: 12px 0;
+    box-shadow: 0 2px 12px rgba(45,49,66,0.09);
+  }
+
+  button {
+    min-height: 48px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    font-family: inherit;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 22px;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  button:active { transform: scale(0.96); }
+  .btn-primary { background: #FF6B6B; color: #fff; }
+  .btn-teal { background: #4ECDC4; color: #2D3142; }
+  .btn-yellow { background: #FFD93D; color: #2D3142; }
+  .btn-ghost { background: #fff; color: #2D3142; border: 3px solid #2D3142; }
+
+  /* How to play */
+  details.howto { background: #fff; border-radius: 20px; margin: 12px 0;
+    box-shadow: 0 2px 12px rgba(45,49,66,0.09); overflow: hidden; }
+  details.howto summary {
+    min-height: 56px; display: flex; align-items: center; gap: 8px;
+    padding: 8px 18px; font-size: 1.2rem; font-weight: 700; cursor: pointer;
+    list-style: none; touch-action: manipulation;
+  }
+  details.howto summary::-webkit-details-marker { display: none; }
+  details.howto summary::before { content: "▶"; font-size: 0.9rem; color: #FF6B6B; }
+  details.howto[open] summary::before { content: "▼"; }
+  details.howto .howto-body { padding: 0 22px 18px; font-size: 1.1rem; line-height: 1.55; }
+  details.howto .howto-body li { margin-bottom: 8px; }
+
+  /* Controls */
+  .controls-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; }
+  .diff-label { font-weight: 700; font-size: 1.05rem; }
+  .diff { background: #fff; color: #2D3142; border: 3px solid #2D3142; }
+  .diff[aria-pressed="true"] { background: #2D3142; color: #fff; }
+  .stats {
+    display: flex; justify-content: center; gap: 26px; margin-top: 12px;
+    font-size: 1.15rem; font-weight: 700;
+  }
+  .stats .stat-num { color: #FF6B6B; font-size: 1.35rem; }
+
+  /* Tree */
+  .tree-scroll { overflow-x: auto; padding: 14px 4px 8px; -webkit-overflow-scrolling: touch; }
+  .tree { display: inline-block; min-width: 100%; text-align: center; }
+  .tnode { display: flex; flex-direction: column; align-items: center; }
+  .kids { display: flex; gap: 22px; justify-content: center; align-items: flex-start; }
+  .branch { display: flex; flex-direction: column; align-items: center; }
+  .connector { width: 4px; height: 16px; background: #E3D5B8; border-radius: 2px; }
+  .node {
+    min-width: 64px; min-height: 64px;
+    font-size: 1.75rem; font-weight: 800;
+    border-radius: 18px; background: #fff;
+    border: 3px solid #2D3142; color: #2D3142;
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 8px 14px; margin: 3px; line-height: 1;
+  }
+  button.node { font-family: inherit; }
+  button.node.sel {
+    background: #FF6B6B; border-color: #FF6B6B; color: #fff;
+    box-shadow: 0 0 0 5px rgba(255,107,107,0.35);
+  }
+  .node.prime { background: #43AA8B; border-color: #43AA8B; color: #fff; }
+  .node.done { background: #EDEDF2; border-color: #C9CBD6; color: #7a7e8f; }
+  .node .tick { font-size: 1.15rem; margin-left: 4px; }
+  .tree-caption { text-align: center; color: #7a7e8f; font-size: 1rem; margin: 6px 0 0; }
+
+  /* Split panel */
+  #splitPrompt { text-align: center; font-size: 1.25rem; font-weight: 700; min-height: 48px;
+    display: flex; align-items: center; justify-content: center; }
+  .equation {
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px; font-size: 2rem; font-weight: 800; flex-wrap: wrap; margin: 6px 0 12px;
+  }
+  .factor-input {
+    width: 100px; height: 68px;
+    font-size: 2rem; font-weight: 800; text-align: center;
+    border: 3px solid #2D3142; border-radius: 14px; font-family: inherit; color: #2D3142;
+    background: #FFFDF7;
+  }
+  .factor-input:focus { outline: none; border-color: #FF6B6B; box-shadow: 0 0 0 4px rgba(255,107,107,0.25); }
+  .split-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  #hintText { text-align: center; font-size: 1.15rem; font-weight: 700; color: #0e7c74;
+    margin-top: 10px; min-height: 1.6em; }
+  #message {
+    text-align: center; font-size: 1.2rem; font-weight: 700;
+    margin-top: 10px; min-height: 2em; line-height: 1.4;
+  }
+  #message.ok { color: #1e7d5f; }
+  #message.err { color: #d64545; }
+  .shake { animation: shake 0.4s ease; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-10px); }
+    40% { transform: translateX(10px); }
+    60% { transform: translateX(-7px); }
+    80% { transform: translateX(7px); }
+  }
+
+  /* Win overlay */
+  #winOverlay {
+    position: fixed; inset: 0; z-index: 50;
+    background: rgba(45,49,66,0.55);
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  #winOverlay[hidden] { display: none; }
+  .win-card {
+    background: #fff; border-radius: 24px; padding: 28px 24px; text-align: center;
+    max-width: 480px; width: 100%; box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    position: relative; z-index: 2;
+  }
+  .win-card h2 { font-size: 2rem; margin: 0 0 8px; }
+  #winFactors { font-size: 1.9rem; font-weight: 800; margin: 12px 0 20px; line-height: 1.5; }
+  #winFactors sup { font-size: 1.1rem; }
+  #confetti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+  .confetti-piece { position: absolute; top: -20px; border-radius: 3px; animation: fall linear forwards; }
+  @keyframes fall {
+    to { transform: translateY(110vh) rotate(720deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .shake { animation: none; }
+    .confetti-piece { display: none; }
+  }
+  .home-btn{display:inline-flex;align-items:center;gap:6px;min-height:48px;padding:10px 20px;background:#FF6B6B;color:#fff;font-weight:700;font-size:1.05rem;text-decoration:none;border-radius:999px;box-shadow:0 2px 6px rgba(45,49,66,.15);font-family:inherit;}
+  .home-btn:active{transform:scale(.96);}
+</style>
+</head>
+<body>
+
+<a class="home-btn" href="../">⌂ Home</a>
+<header>
+  <h1>🕵️ Factor Tree Detective</h1>
+  <p class="subtitle">Crack the case of the mystery number!</p>
+</header>
+
+<details class="howto">
+  <summary>❓ How to play</summary>
+  <div class="howto-body">
+    <ol>
+      <li>👆 <b>Tap a white number</b> on the tree to pick it.</li>
+      <li>✏️ Type <b>two numbers that multiply</b> to make it, then press <b>Split</b>.</li>
+      <li>🌳 Keep splitting until every number is <b>prime</b> (green with a ✓) — then the case is closed! 🎉</li>
+    </ol>
+  </div>
+</details>
+
+<section class="card">
+  <div class="controls-row">
+    <span class="diff-label">Difficulty:</span>
+    <button class="diff" id="diffEasy" aria-pressed="true">Easy ≤ 60</button>
+    <button class="diff" id="diffMedium" aria-pressed="false">Medium ≤ 200</button>
+    <button class="diff" id="diffHard" aria-pressed="false">Hard ≤ 500</button>
+  </div>
+  <div class="controls-row" style="margin-top:10px;">
+    <button class="btn-yellow" id="newCaseBtn">🔍 New case</button>
+    <button class="btn-ghost" id="muteBtn" aria-label="Toggle sound">🔊</button>
+  </div>
+  <div class="stats">
+    <span>🏆 Cases solved: <span class="stat-num" id="solvedCount">0</span></span>
+    <span>🔥 Streak: <span class="stat-num" id="streakCount">0</span></span>
+  </div>
+</section>
+
+<section class="card">
+  <div class="tree-scroll">
+    <div class="tree" id="tree"></div>
+  </div>
+  <p class="tree-caption">Tap a <b>white</b> number to split it. Green ✓ numbers are prime — done!</p>
+</section>
+
+<section class="card" id="splitCard">
+  <div id="splitPrompt">👆 Tap a white number on the tree to split it!</div>
+  <form id="splitForm" hidden autocomplete="off">
+    <div class="equation">
+      <input class="factor-input" id="fa" type="text" inputmode="numeric" pattern="[0-9]*"
+             maxlength="3" autocomplete="off" autocapitalize="off" aria-label="First factor">
+      <span>×</span>
+      <input class="factor-input" id="fb" type="text" inputmode="numeric" pattern="[0-9]*"
+             maxlength="3" autocomplete="off" autocapitalize="off" aria-label="Second factor">
+      <span>=</span>
+      <span id="splitN"></span>
+    </div>
+    <div class="split-actions">
+      <button type="submit" class="btn-primary">✂️ Split!</button>
+      <button type="button" class="btn-teal" id="hintBtn">💡 Hint</button>
+    </div>
+  </form>
+  <div id="hintText" aria-live="polite"></div>
+  <div id="message" aria-live="polite"></div>
+</section>
+
+<div id="winOverlay" hidden>
+  <div id="confetti"></div>
+  <div class="win-card">
+    <h2>🎉 Case Closed!</h2>
+    <p style="font-size:1.2rem;margin:0;">You found every prime factor:</p>
+    <p id="winFactors"></p>
+    <button class="btn-primary" id="winNewCaseBtn">🔍 New case</button>
+  </div>
+</div>
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Math helpers (all checked & dependency-free) ---------- */
+
+  // Trial-division primality test. Correct for all n >= 0.
+  function isPrime(n) {
+    if (n < 2) return false;
+    if (n === 2 || n === 3) return true;
+    if (n % 2 === 0) return false;
+    var limit = Math.floor(Math.sqrt(n));
+    for (var i = 3; i <= limit; i += 2) {
+      if (n % i === 0) return false;
+    }
+    return true;
+  }
+
+  // Smallest prime factor of a composite n (n >= 4).
+  function smallestPrimeFactor(n) {
+    if (n % 2 === 0) return 2;
+    var limit = Math.floor(Math.sqrt(n));
+    for (var i = 3; i <= limit; i += 2) {
+      if (n % i === 0) return i;
+    }
+    return n; // n is prime
+  }
+
+  function randomComposite(max) {
+    var n = 4;
+    do {
+      n = 4 + Math.floor(Math.random() * (max - 3)); // 4..max inclusive
+    } while (isPrime(n));
+    return n;
+  }
+
+  function diffMax(diff) {
+    if (diff === "medium") return 200;
+    if (diff === "hard") return 500;
+    return 60;
+  }
+
+  /* ---------- Sound (WebAudio, Safari-safe, guarded) ---------- */
+
+  var audioCtx = null;
+  function tone(freqStart, freqEnd, durationMs, type) {
+    if (state.muted) return;
+    try {
+      if (!audioCtx) {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        audioCtx = new AC();
+      }
+      if (audioCtx.state === "suspended") { audioCtx.resume(); }
+      var t = audioCtx.currentTime;
+      var osc = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
+      osc.type = type || "sine";
+      osc.frequency.setValueAtTime(freqStart, t);
+      osc.frequency.exponentialRampToValueAtTime(freqEnd, t + durationMs / 1000);
+      gain.gain.setValueAtTime(0.22, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + durationMs / 1000);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(t);
+      osc.stop(t + durationMs / 1000 + 0.05);
+    } catch (e) { /* audio is a bonus — never break the game */ }
+  }
+  function ding() { tone(660, 1320, 220, "sine"); }
+  function buzz() { tone(220, 140, 220, "triangle"); }
+
+  /* ---------- State ---------- */
+
+  var state = {
+    difficulty: "easy",
+    root: null,
+    nodeSeq: 0,
+    nodeById: {},
+    selectedId: null,
+    solved: 0,
+    streak: 0,
+    muted: false
+  };
+
+  function makeNode(value) {
+    state.nodeSeq += 1;
+    var node = { id: state.nodeSeq, value: value, children: null };
+    state.nodeById[node.id] = node;
+    return node;
+  }
+
+  /* ---------- Storage (best-effort, never breaks game) ---------- */
+
+  function loadPrefs() {
+    try {
+      var s = window.localStorage.getItem("factorTreeDetective");
+      if (s) {
+        var p = JSON.parse(s);
+        if (typeof p.solved === "number") state.solved = p.solved;
+        if (typeof p.streak === "number") state.streak = p.streak;
+        if (typeof p.muted === "boolean") state.muted = p.muted;
+      }
+    } catch (e) { /* ignore */ }
+  }
+  function savePrefs() {
+    try {
+      window.localStorage.setItem("factorTreeDetective",
+        JSON.stringify({ solved: state.solved, streak: state.streak, muted: state.muted }));
+    } catch (e) { /* ignore */ }
+  }
+
+  /* ---------- DOM ---------- */
+
+  var treeEl = document.getElementById("tree");
+  var splitPrompt = document.getElementById("splitPrompt");
+  var splitForm = document.getElementById("splitForm");
+  var splitN = document.getElementById("splitN");
+  var faInput = document.getElementById("fa");
+  var fbInput = document.getElementById("fb");
+  var hintBtn = document.getElementById("hintBtn");
+  var hintText = document.getElementById("hintText");
+  var messageEl = document.getElementById("message");
+  var splitCard = document.getElementById("splitCard");
+  var solvedCountEl = document.getElementById("solvedCount");
+  var streakCountEl = document.getElementById("streakCount");
+  var muteBtn = document.getElementById("muteBtn");
+  var winOverlay = document.getElementById("winOverlay");
+  var winFactors = document.getElementById("winFactors");
+  var confettiEl = document.getElementById("confetti");
+
+  var CHEERS = [
+    "Nice detective work! 🕵️",
+    "You cracked it! 🎯",
+    "Brilliant splitting! ✨",
+    "The case is heating up! 🔥",
+    "Sharp eyes, detective! 👀",
+    "That's the way! 💪"
+  ];
+
+  function showMessage(text, kind) {
+    messageEl.textContent = text;
+    messageEl.className = kind || "";
+  }
+  function clearHint() { hintText.textContent = ""; }
+
+  function updateStats() {
+    solvedCountEl.textContent = String(state.solved);
+    streakCountEl.textContent = String(state.streak);
+  }
+  function updateMuteBtn() {
+    muteBtn.textContent = state.muted ? "🔇" : "🔊";
+    muteBtn.setAttribute("aria-label", state.muted ? "Unmute sound" : "Mute sound");
+  }
+
+  /* ---------- Tree rendering (nested flexbox) ---------- */
+
+  function renderNode(node) {
+    var html = '<div class="tnode">';
+    var prime = isPrime(node.value);
+    if (node.children) {
+      // Already split: show as a settled parent (not selectable).
+      html += '<span class="node done">' + node.value + '</span>';
+      html += '<div class="connector"></div>';
+      html += '<div class="kids">';
+      html += '<div class="branch">' + renderNode(node.children[0]) + '</div>';
+      html += '<div class="branch">' + renderNode(node.children[1]) + '</div>';
+      html += '</div>';
+    } else if (prime) {
+      // Prime leaf: automatically green with a check.
+      html += '<span class="node prime">' + node.value +
+              '<span class="tick" aria-hidden="true">✓</span></span>';
+    } else {
+      // Composite, not yet split: tap to select.
+      var sel = (node.id === state.selectedId) ? " sel" : "";
+      var pressed = (node.id === state.selectedId) ? ' aria-pressed="true"' : ' aria-pressed="false"';
+      html += '<button type="button" class="node' + sel + '" data-node-id="' + node.id +
+              '"' + pressed + ' aria-label="Split ' + node.value + '">' + node.value + '</button>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function render() {
+    treeEl.innerHTML = renderNode(state.root);
+  }
+
+  // Tap delegation: only composite unsplit nodes are <button>s.
+  treeEl.addEventListener("click", function (ev) {
+    var btn = ev.target.closest("button.node");
+    if (!btn) return;
+    var id = parseInt(btn.getAttribute("data-node-id"), 10);
+    selectNode(id);
+  });
+
+  function selectNode(id) {
+    var node = state.nodeById[id];
+    if (!node || node.children || isPrime(node.value)) return; // safety
+    state.selectedId = (state.selectedId === id) ? null : id; // tap again to deselect
+    if (state.selectedId === null) {
+      splitPrompt.hidden = false;
+      splitForm.hidden = true;
+      splitPrompt.textContent = "👆 Tap a white number on the tree to split it!";
+      clearHint();
+    } else {
+      var n = state.nodeById[state.selectedId].value;
+      splitPrompt.hidden = true;
+      splitForm.hidden = false;
+      splitN.textContent = String(n);
+      faInput.value = "";
+      fbInput.value = "";
+      clearHint();
+      showMessage("", "");
+      faInput.focus();
+    }
+    render();
+  }
+
+  /* ---------- Splitting & validation ---------- */
+
+  function trySplit(ev) {
+    if (ev) ev.preventDefault();
+    var node = state.nodeById[state.selectedId];
+    if (!node) return;
+    var n = node.value;
+    var aStr = faInput.value.trim();
+    var bStr = fbInput.value.trim();
+
+    if (aStr === "" || bStr === "") {
+      wrong("Type two numbers first, detective! ✏️");
+      return;
+    }
+    var a = parseInt(aStr, 10);
+    var b = parseInt(bStr, 10);
+    if (isNaN(a) || isNaN(b) || String(a) !== aStr || String(b) !== bStr) {
+      wrong("Numbers only, detective! 🔢");
+      return;
+    }
+    if (a === 1 || b === 1) {
+      wrong("No sneaky 1 × " + n + "! Find smaller pieces! 🕵️");
+      return;
+    }
+    if (a < 2 || b < 2) {
+      wrong("Both numbers must be bigger than 1!");
+      return;
+    }
+    if (a >= n || b >= n) {
+      wrong("Too big! Both numbers must be smaller than " + n + ".");
+      return;
+    }
+    if (a * b !== n) {
+      wrong(a + " × " + b + " = " + (a * b) + ", not " + n + " — try again! 💪");
+      return;
+    }
+
+    // Correct split!
+    node.children = [makeNode(a), makeNode(b)];
+    state.selectedId = null;
+    splitPrompt.hidden = false;
+    splitForm.hidden = true;
+    splitPrompt.textContent = "👆 Tap a white number on the tree to split it!";
+    clearHint();
+    ding();
+    showMessage(CHEERS[Math.floor(Math.random() * CHEERS.length)], "ok");
+    render();
+    checkWin();
+  }
+
+  function wrong(text) {
+    buzz();
+    showMessage(text, "err");
+    splitCard.classList.remove("shake");
+    // Force reflow so the shake replays on repeated mistakes.
+    void splitCard.offsetWidth;
+    splitCard.classList.add("shake");
+  }
+
+  function hint() {
+    var node = state.nodeById[state.selectedId];
+    if (!node) {
+      showMessage("Pick a number on the tree first! 👆", "err");
+      return;
+    }
+    var n = node.value;
+    var p = smallestPrimeFactor(n);
+    hintText.textContent = "💡 Clue: " + n + " is divisible by " + p + ".";
+  }
+
+  /* ---------- Win detection & factorization ---------- */
+
+  function hasUnsplit(node) {
+    if (node.children) {
+      return hasUnsplit(node.children[0]) || hasUnsplit(node.children[1]);
+    }
+    return !isPrime(node.value);
+  }
+
+  function collectLeaves(node, out) {
+    if (node.children) {
+      collectLeaves(node.children[0], out);
+      collectLeaves(node.children[1], out);
+    } else {
+      out.push(node.value); // at win time, every leaf is prime
+    }
+  }
+
+  // Groups leaf primes into a factorization string with <sup> exponents.
+  function formatFactorization(n) {
+    var leaves = [];
+    collectLeaves(state.root, leaves);
+    var counts = {};
+    for (var i = 0; i < leaves.length; i++) {
+      var p = leaves[i];
+      counts[p] = (counts[p] || 0) + 1;
+    }
+    var primes = Object.keys(counts).map(Number).sort(function (x, y) { return x - y; });
+    var parts = primes.map(function (p) {
+      return counts[p] > 1 ? p + "<sup>" + counts[p] + "</sup>" : String(p);
+    });
+    return n + " = " + parts.join(" × ");
+  }
+
+  function checkWin() {
+    if (hasUnsplit(state.root)) return;
+    state.solved += 1;
+    state.streak += 1;
+    savePrefs();
+    updateStats();
+    winFactors.innerHTML = formatFactorization(state.root.value);
+    winOverlay.hidden = false;
+    launchConfetti();
+    // A little fanfare.
+    setTimeout(ding, 120);
+    setTimeout(ding, 340);
+  }
+
+  /* ---------- Confetti (simple CSS pieces) ---------- */
+
+  function launchConfetti() {
+    confettiEl.innerHTML = "";
+    var colors = ["#FF6B6B", "#4ECDC4", "#FFD93D", "#43AA8B", "#9B5DE5", "#F15BB5"];
+    for (var i = 0; i < 90; i++) {
+      var piece = document.createElement("div");
+      piece.className = "confetti-piece";
+      var size = 6 + Math.random() * 8;
+      piece.style.left = (Math.random() * 100) + "%";
+      piece.style.width = size + "px";
+      piece.style.height = (size * (0.5 + Math.random())) + "px";
+      piece.style.background = colors[i % colors.length];
+      piece.style.animationDuration = (1.8 + Math.random() * 1.6) + "s";
+      piece.style.animationDelay = (Math.random() * 0.6) + "s";
+      confettiEl.appendChild(piece);
+    }
+  }
+
+  /* ---------- New case / difficulty ---------- */
+
+  function treeIsFinished() {
+    return !hasUnsplit(state.root);
+  }
+
+  function newCase() {
+    // Abandoning an unfinished case breaks the streak.
+    if (state.root && !treeIsFinished()) {
+      state.streak = 0;
+    }
+    state.nodeSeq = 0;
+    state.nodeById = {};
+    state.selectedId = null;
+    var max = diffMax(state.difficulty);
+    state.root = makeNode(randomComposite(max));
+    splitPrompt.hidden = false;
+    splitForm.hidden = true;
+    splitPrompt.textContent = "👆 Tap a white number on the tree to split it!";
+    clearHint();
+    showMessage("", "");
+    winOverlay.hidden = true;
+    confettiEl.innerHTML = "";
+    updateStats();
+    savePrefs();
+    render();
+  }
+
+  function setDifficulty(diff, btn) {
+    if (state.difficulty === diff) return;
+    state.difficulty = diff;
+    var btns = [document.getElementById("diffEasy"),
+                document.getElementById("diffMedium"),
+                document.getElementById("diffHard")];
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute("aria-pressed", btns[i] === btn ? "true" : "false");
+    }
+    newCase();
+  }
+
+  /* ---------- Wire up ---------- */
+
+  document.getElementById("diffEasy").addEventListener("click", function () {
+    setDifficulty("easy", this);
+  });
+  document.getElementById("diffMedium").addEventListener("click", function () {
+    setDifficulty("medium", this);
+  });
+  document.getElementById("diffHard").addEventListener("click", function () {
+    setDifficulty("hard", this);
+  });
+  document.getElementById("newCaseBtn").addEventListener("click", newCase);
+  document.getElementById("winNewCaseBtn").addEventListener("click", newCase);
+  splitForm.addEventListener("submit", trySplit);
+  hintBtn.addEventListener("click", hint);
+  muteBtn.addEventListener("click", function () {
+    state.muted = !state.muted;
+    updateMuteBtn();
+    savePrefs();
+    if (!state.muted) ding();
+  });
+
+  /* ---------- Go ---------- */
+
+  loadPrefs();
+  updateStats();
+  updateMuteBtn();
+  newCase();
+})();
+</script>
+</body>
+</html>
