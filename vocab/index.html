@@ -17,134 +17,159 @@ button{font:inherit;border:0;cursor:pointer}
 .app{width:min(760px,100%);margin:auto;padding:20px 18px 35px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
 .logo{font-size:23px;font-weight:850} .sub{font-size:13px;color:var(--muted)}
-.icon{background:white;border-radius:12px;padding:9px 11px;box-shadow:0 3px 12px #0000000c}
+.topbtns{display:flex;gap:8px}
+.icon{background:white;border-radius:12px;padding:9px 11px;box-shadow:0 3px 12px #0000000c;text-decoration:none;color:var(--text);font-size:18px;min-width:44px;min-height:44px;text-align:center;line-height:1.2}
 .tabs{display:flex;gap:7px;overflow:auto;padding:3px;margin-bottom:14px}
-.tab{padding:9px 14px;border-radius:999px;background:#e8eaf2;color:#596579;font-weight:700;white-space:nowrap}
+.tab{padding:9px 14px;border-radius:999px;background:#e8eaf2;color:#596579;font-weight:700;white-space:nowrap;min-height:44px}
 .tab.active{background:var(--accent);color:#fff}
 .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:15px}
 .stat{background:#fff;border-radius:14px;padding:10px;text-align:center;box-shadow:0 4px 16px #0000000a}
 .stat b{display:block;font-size:20px} .stat span{font-size:11px;color:var(--muted)}
-.card{background:var(--card);border-radius:28px;box-shadow:var(--shadow);padding:35px 28px 28px;text-align:center;min-height:485px;display:flex;flex-direction:column;justify-content:center}
-.badge{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:15px}
-.word{font-size:52px;font-weight:900;line-height:1.05;margin-bottom:24px}
-.pronounce{background:#eef0ff;color:var(--accent);border-radius:50%;width:44px;height:44px;font-size:20px;margin:-10px auto 18px}
-.answer{min-height:145px}
-.definition{font-size:22px;line-height:1.4;margin:0 auto 12px}
-.example{font-size:16px;color:var(--muted);line-height:1.5;margin:0 auto 22px}
-.hidden{visibility:hidden}
-.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.primary,.secondary,.good,.bad{padding:14px 19px;border-radius:14px;font-weight:800}
-.primary{background:var(--accent);color:white;min-width:150px}
-.secondary{background:#eceef5;color:#35405a}
-.good{background:#e5f6ec;color:var(--good)} .bad{background:#fde9e8;color:var(--bad)}
-.nav{display:flex;gap:10px;margin-top:13px} .nav button{flex:1;padding:11px;border-radius:12px;background:#fff;color:#596579;font-weight:700}
-.quiz{display:none} .quiz h2{font-size:20px;margin:0 0 18px} .choices{display:grid;gap:10px} .choice{background:#f0f2f8;padding:14px;border-radius:13px;text-align:left;font-weight:700}
+.progress{height:12px;background:#e8eaf2;border-radius:20px;overflow:hidden;margin:0 2px 14px}
+.bar{height:100%;width:0;background:var(--accent);transition:.35s}
+.card{background:var(--card);border-radius:28px;box-shadow:var(--shadow);padding:30px 24px 26px;text-align:center;min-height:520px;display:flex;flex-direction:column;justify-content:center}
+.badge{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:12px}
+.word{font-size:52px;font-weight:900;line-height:1.05;margin-bottom:6px}
+.pronounce{background:#eef0ff;color:var(--accent);border-radius:50%;width:44px;height:44px;font-size:20px;margin:6px auto 16px}
+.q{font-size:15px;color:var(--muted);margin-bottom:16px}
+.choices{display:grid;gap:10px;text-align:left}
+.choice{background:#f0f2f8;padding:16px;border-radius:13px;font-weight:600;font-size:17px;line-height:1.35;min-height:56px;text-align:left}
 .choice:hover{background:#e4e7f2}
-.result{margin-top:14px;font-weight:800;min-height:24px}
+.choice.correct{background:#d1f2dd;color:#0d6b34;border:2px solid var(--good)}
+.choice.wrong{background:#fde9e8;color:#a02020;border:2px solid var(--bad)}
+.choice:disabled{cursor:default;opacity:1}
+.message{min-height:28px;margin:14px 0 4px;font-weight:800;font-size:18px}
+.example{font-size:16px;color:var(--muted);line-height:1.5;margin:6px auto 4px;min-height:24px}
+.nextwrap{margin-top:16px}
+.primary{background:var(--accent);color:white;padding:14px 19px;border-radius:14px;font-weight:800;min-width:180px;min-height:48px}
+.primary:disabled{background:#c9cbe0}
 .footer{text-align:center;color:#8992a4;font-size:12px;margin-top:14px}
-@media(max-width:520px){.card{min-height:500px;padding:30px 18px 23px}.word{font-size:40px}.definition{font-size:20px}}
+.confetti{position:fixed;z-index:20;pointer-events:none;font-size:25px;animation:fall 1.3s ease-out forwards}
+@keyframes fall{to{transform:translateY(90vh) rotate(500deg);opacity:0}}
+.modal{position:fixed;inset:0;background:#fff9;display:none;align-items:center;justify-content:center;z-index:30}
+.modal.show{display:flex}
+.modalin{width:min(430px,90%);background:white;border:5px solid #d9d4ff;border-radius:28px;padding:23px;text-align:center;box-shadow:0 15px 50px #1d204050}
+.modalin .big{font-size:58px}
+.modalin h2{color:#3d3480}
+.modalin button{background:var(--accent);color:white;border:0;border-radius:18px;padding:12px 23px;font:inherit;font-weight:bold;min-height:48px;cursor:pointer}
+@media(max-width:520px){.card{min-height:540px;padding:26px 16px 22px}.word{font-size:40px}.choice{font-size:16px}}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="top">
-    <div><div class="logo">🧠 Zen's Vocab Quest</div><div class="sub">Units 1–3 • Learn • Practice • Master</div></div>
-    <button class="icon" onclick="resetProgress()" title="Reset progress">↺</button>
+    <div><div class="logo">&#129504; Zen's Vocab Quest</div><div class="sub">Units 1&ndash;3 &bull; Pick the right definition!</div></div>
+    <div class="topbtns">
+      <a class="icon" href="../" title="Home">&#8962;</a>
+      <button class="icon" id="muteBtn" onclick="toggleMute()" title="Sound">&#128266;</button>
+      <button class="icon" onclick="resetProgress()" title="Reset progress">&#8635;</button>
+    </div>
   </div>
   <div class="tabs" id="tabs"></div>
   <div class="stats">
-    <div class="stat"><b id="know">0</b><span>Know it</span></div>
-    <div class="stat"><b id="practice">0</b><span>Need practice</span></div>
-    <div class="stat"><b id="remaining">0</b><span>Not rated</span></div>
+    <div class="stat"><b id="score">0</b><span>Score</span></div>
+    <div class="stat"><b id="streak">0</b><span>&#128293; Streak</span></div>
+    <div class="stat"><b id="know">0 / 44</b><span>Know it</span></div>
   </div>
-  <div class="card" id="flash">
+  <div class="progress"><div class="bar" id="bar"></div></div>
+  <div class="card">
     <div class="badge" id="unit"></div>
     <div class="word" id="word"></div>
-    <button class="pronounce" onclick="speak()" title="Hear word">🔊</button>
-    <div id="answer" class="answer hidden">
-      <p class="definition" id="definition"></p>
-      <p class="example" id="example"></p>
-    </div>
-    <div class="actions">
-      <button class="secondary" id="show" onclick="toggleAnswer()">Show Definition</button>
-      <button class="primary" onclick="next()">Next →</button>
-    </div>
-    <div class="actions" id="rating" style="margin-top:10px;display:none">
-      <button class="bad" onclick="rate('practice')">↻ I Need Practice</button>
-      <button class="good" onclick="rate('know')">✓ I Know It</button>
-    </div>
-  </div>
-
-  <div class="quiz" id="quiz">
-    <div class="card">
-      <div class="badge">Quiz Mode</div>
-      <h2 id="qword"></h2>
-      <div class="choices" id="choices"></div>
-      <div class="result" id="result"></div>
-      <div class="actions" style="margin-top:16px"><button class="primary" onclick="newQuiz()">Next Question →</button></div>
-    </div>
-  </div>
-
-  <div class="nav">
-    <button onclick="shuffle()">🔀 Shuffle</button>
-    <button onclick="startQuiz()">🎯 Quiz Mode</button>
+    <button class="pronounce" onclick="speak()" title="Hear word">&#128266;</button>
+    <div class="q">What does this word mean?</div>
+    <div class="choices" id="choices"></div>
+    <div class="message" id="message"></div>
+    <div class="example" id="example"></div>
+    <div class="nextwrap"><button class="primary" id="nextBtn" onclick="nextQuestion()" disabled>Next &rarr;</button></div>
   </div>
   <div class="footer">Your progress is saved on this device. No account or internet connection is required.</div>
 </div>
-
+<div class="modal" id="modal"><div class="modalin"><div class="big">&#127881;&#11088;&#129504;</div><h2>You did it! &#127881;</h2><p id="modalText">You finished 10 questions!</p><button onclick="closeModal()">Play Again! &#129504;</button></div></div>
 <script>
 const ALL=[{"unit": "Unit 1", "word": "Bizarre", "definition": "Very strange, unusual, or surprising.", "example": "The bizarre noise made everyone look around."}, {"unit": "Unit 1", "word": "Effective", "definition": "Successful in producing the result you want.", "example": "The new study method was effective."}, {"unit": "Unit 1", "word": "Ineffective", "definition": "Not successful in producing the result you want.", "example": "The ineffective plan did not solve the problem."}, {"unit": "Unit 1", "word": "Sag", "definition": "To droop or sink downward, usually because of weight or age.", "example": "The heavy backpack made the strap sag."}, {"unit": "Unit 1", "word": "Creak", "definition": "A long, high-pitched squeaking or groaning sound.", "example": "The old wooden door began to creak."}, {"unit": "Unit 1", "word": "Reminisce", "definition": "To think or talk about memories from the past.", "example": "Grandpa likes to reminisce about his childhood."}, {"unit": "Unit 1", "word": "Trim", "definition": "To cut away unwanted or extra parts.", "example": "Dad used scissors to trim the hedge."}, {"unit": "Unit 1", "word": "Transform", "definition": "To change something greatly so that it looks or works differently.", "example": "The caterpillar will transform into a butterfly."}, {"unit": "Unit 1", "word": "Sidesplitting", "definition": "Extremely funny; making you laugh very hard.", "example": "The comedian told a sidesplitting joke."}, {"unit": "Unit 1", "word": "Enthusiastic", "definition": "Very excited and eager about something.", "example": "Zen was enthusiastic about the school field trip."}, {"unit": "Unit 1", "word": "Adore", "definition": "To love or like something very much.", "example": "She adores her little brother."}, {"unit": "Unit 2", "word": "Slight", "definition": "Small in amount, degree, or importance.", "example": "There was a slight change in the weather."}, {"unit": "Unit 2", "word": "Topple", "definition": "To fall or cause something to fall over.", "example": "The blocks toppled when the table shook."}, {"unit": "Unit 2", "word": "Severe", "definition": "Very serious, strong, or harsh.", "example": "The town prepared for a severe storm."}, {"unit": "Unit 2", "word": "Landscape", "definition": "The visible features of an area of land, such as hills, trees, and rivers.", "example": "The mountain landscape was beautiful."}, {"unit": "Unit 2", "word": "Tilt", "definition": "To move or make something move so that it is no longer level.", "example": "Tilt the cup carefully so the water does not spill."}, {"unit": "Unit 2", "word": "Rubble", "definition": "Broken pieces of stone, brick, or other material left after a building is damaged.", "example": "Workers cleared the rubble after the wall fell."}, {"unit": "Unit 2", "word": "Rowdy", "definition": "Noisy, wild, and difficult to control.", "example": "The rowdy crowd became too loud."}, {"unit": "Unit 2", "word": "Impressive", "definition": "Very good or remarkable and likely to make people admire it.", "example": "Her impressive drawing won first prize."}, {"unit": "Unit 2", "word": "Analyze", "definition": "To study something carefully in order to understand it.", "example": "Scientists analyze the results of an experiment."}, {"unit": "Unit 2", "word": "Trend", "definition": "A general direction in which something is changing or becoming popular.", "example": "A trend toward healthier snacks has grown."}, {"unit": "Unit 2", "word": "Boost", "definition": "To increase or improve something.", "example": "Getting enough sleep can boost your energy."}, {"unit": "Unit 2", "word": "Hardship", "definition": "A difficult situation or condition that causes suffering or problems.", "example": "The family worked together through the hardship."}, {"unit": "Unit 2", "word": "Seek", "definition": "To look for or try to find something.", "example": "We went outside to seek a cooler place."}, {"unit": "Unit 2", "word": "Plead", "definition": "To ask strongly or urgently for something.", "example": "The children pleaded with their parents to stay longer."}, {"unit": "Unit 2", "word": "Experience", "definition": "Something that happens to you or something you learn by doing.", "example": "Visiting another country was a great experience."}, {"unit": "Unit 2", "word": "Custom", "definition": "A traditional way of behaving or doing something in a particular place or group.", "example": "Removing your shoes indoors is a custom in Japan."}, {"unit": "Unit 3", "word": "Dissimilar", "definition": "Not alike; different from each other.", "example": "The two paintings are very dissimilar."}, {"unit": "Unit 3", "word": "Focus", "definition": "To give your full attention to something.", "example": "Please focus on your homework."}, {"unit": "Unit 3", "word": "Function", "definition": "The purpose or job that something is designed to perform.", "example": "The function of a zipper is to open and close clothing."}, {"unit": "Unit 3", "word": "Sensitive", "definition": "Easily affected, hurt, or bothered by something.", "example": "Some people have sensitive skin."}, {"unit": "Unit 3", "word": "Critical", "definition": "Extremely important; something that must not be overlooked.", "example": "It is critical to wear a helmet when riding a bike."}, {"unit": "Unit 3", "word": "Obstacle", "definition": "Something that blocks your way or makes it harder to reach a goal.", "example": "The fallen tree was an obstacle on the trail."}, {"unit": "Unit 3", "word": "Nosing around", "definition": "Looking around or searching for information, especially when you are curious about private things.", "example": "The puppy was nosing around in the kitchen."}, {"unit": "Unit 3", "word": "Edible", "definition": "Safe and suitable to eat.", "example": "These berries are edible."}, {"unit": "Unit 3", "word": "Inedible", "definition": "Not safe or suitable to eat.", "example": "The decoration looked like candy, but it was inedible."}, {"unit": "Unit 3", "word": "Consistent", "definition": "Doing or happening in the same way over time; steady and reliable.", "example": "Consistent practice helped her improve."}, {"unit": "Unit 3", "word": "Inconsistent", "definition": "Not staying the same; changing in a way that is not steady or reliable.", "example": "His inconsistent practice made progress difficult."}, {"unit": "Unit 3", "word": "Keen", "definition": "Very interested, eager, or excited about something.", "example": "Zen is keen to learn how to make the model."}, {"unit": "Unit 3", "word": "Ideal", "definition": "Perfect or most suitable for a particular purpose.", "example": "A sunny day is ideal for a picnic."}, {"unit": "Unit 3", "word": "Flee", "definition": "To run away from danger or a threatening situation.", "example": "The rabbit fled when it heard the dog."}, {"unit": "Unit 3", "word": "Resemble", "definition": "To look or be similar to someone or something.", "example": "The puppy resembles its mother."}, {"unit": "Unit 3", "word": "Blotch", "definition": "An irregular spot or mark, usually one that is different in color.", "example": "A red blotch appeared on the paper."}, {"unit": "Unit 3", "word": "Lethal", "definition": "Able to cause death.", "example": "Some poisonous snakes have lethal venom."}];
-let deck=[...ALL], index=0, currentUnit="All", mode="flash";
+let currentUnit="All", round=[], roundIndex=0, answered=0, score=0, roundScore=0, streak=0, current=null, currentOpts=[], locked=false, muted=false;
 let progress=JSON.parse(localStorage.getItem("zenVocabProgress")||"{}");
-
-function unitCards(){return currentUnit==="All"?ALL:ALL.filter(c=>c.unit===currentUnit)}
-function buildTabs(){
- let names=["All",...Object.keys({"Unit 1": [["Bizarre", "Very strange, unusual, or surprising.", "The bizarre noise made everyone look around."], ["Effective", "Successful in producing the result you want.", "The new study method was effective."], ["Ineffective", "Not successful in producing the result you want.", "The ineffective plan did not solve the problem."], ["Sag", "To droop or sink downward, usually because of weight or age.", "The heavy backpack made the strap sag."], ["Creak", "A long, high-pitched squeaking or groaning sound.", "The old wooden door began to creak."], ["Reminisce", "To think or talk about memories from the past.", "Grandpa likes to reminisce about his childhood."], ["Trim", "To cut away unwanted or extra parts.", "Dad used scissors to trim the hedge."], ["Transform", "To change something greatly so that it looks or works differently.", "The caterpillar will transform into a butterfly."], ["Sidesplitting", "Extremely funny; making you laugh very hard.", "The comedian told a sidesplitting joke."], ["Enthusiastic", "Very excited and eager about something.", "Zen was enthusiastic about the school field trip."], ["Adore", "To love or like something very much.", "She adores her little brother."]], "Unit 2": [["Slight", "Small in amount, degree, or importance.", "There was a slight change in the weather."], ["Topple", "To fall or cause something to fall over.", "The blocks toppled when the table shook."], ["Severe", "Very serious, strong, or harsh.", "The town prepared for a severe storm."], ["Landscape", "The visible features of an area of land, such as hills, trees, and rivers.", "The mountain landscape was beautiful."], ["Tilt", "To move or make something move so that it is no longer level.", "Tilt the cup carefully so the water does not spill."], ["Rubble", "Broken pieces of stone, brick, or other material left after a building is damaged.", "Workers cleared the rubble after the wall fell."], ["Rowdy", "Noisy, wild, and difficult to control.", "The rowdy crowd became too loud."], ["Impressive", "Very good or remarkable and likely to make people admire it.", "Her impressive drawing won first prize."], ["Analyze", "To study something carefully in order to understand it.", "Scientists analyze the results of an experiment."], ["Trend", "A general direction in which something is changing or becoming popular.", "A trend toward healthier snacks has grown."], ["Boost", "To increase or improve something.", "Getting enough sleep can boost your energy."], ["Hardship", "A difficult situation or condition that causes suffering or problems.", "The family worked together through the hardship."], ["Seek", "To look for or try to find something.", "We went outside to seek a cooler place."], ["Plead", "To ask strongly or urgently for something.", "The children pleaded with their parents to stay longer."], ["Experience", "Something that happens to you or something you learn by doing.", "Visiting another country was a great experience."], ["Custom", "A traditional way of behaving or doing something in a particular place or group.", "Removing your shoes indoors is a custom in Japan."]], "Unit 3": [["Dissimilar", "Not alike; different from each other.", "The two paintings are very dissimilar."], ["Focus", "To give your full attention to something.", "Please focus on your homework."], ["Function", "The purpose or job that something is designed to perform.", "The function of a zipper is to open and close clothing."], ["Sensitive", "Easily affected, hurt, or bothered by something.", "Some people have sensitive skin."], ["Critical", "Extremely important; something that must not be overlooked.", "It is critical to wear a helmet when riding a bike."], ["Obstacle", "Something that blocks your way or makes it harder to reach a goal.", "The fallen tree was an obstacle on the trail."], ["Nosing around", "Looking around or searching for information, especially when you are curious about private things.", "The puppy was nosing around in the kitchen."], ["Edible", "Safe and suitable to eat.", "These berries are edible."], ["Inedible", "Not safe or suitable to eat.", "The decoration looked like candy, but it was inedible."], ["Consistent", "Doing or happening in the same way over time; steady and reliable.", "Consistent practice helped her improve."], ["Inconsistent", "Not staying the same; changing in a way that is not steady or reliable.", "His inconsistent practice made progress difficult."], ["Keen", "Very interested, eager, or excited about something.", "Zen is keen to learn how to make the model."], ["Ideal", "Perfect or most suitable for a particular purpose.", "A sunny day is ideal for a picnic."], ["Flee", "To run away from danger or a threatening situation.", "The rabbit fled when it heard the dog."], ["Resemble", "To look or be similar to someone or something.", "The puppy resembles its mother."], ["Blotch", "An irregular spot or mark, usually one that is different in color.", "A red blotch appeared on the paper."], ["Lethal", "Able to cause death.", "Some poisonous snakes have lethal venom."]]})];
- document.getElementById("tabs").innerHTML=names.map(n=>`<button class="tab ${n===currentUnit?'active':''}" onclick="selectUnit('${n}')">${n}</button>`).join("");
-}
-function selectUnit(u){currentUnit=u;deck=unitCards();index=0;mode="flash";document.getElementById("flash").style.display="flex";document.getElementById("quiz").style.display="none";buildTabs();render()}
+const praise=["Amazing! \u{1F389}","You got it! \u2B50","Brilliant! \u{1F9E0}","Excellent! \u{1F44F}","Superstar! \u{1F31F}","Way to go! \u{1F38A}"];
+const retry=["Good try! \u{1F9E0}","Almost! You'll get the next one! \u{1F4AA}","Keep going! \u2B50"];
+let audioCtx=null;
+function tone(f0,f1,dur,type){if(muted)return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type||"sine";o.frequency.setValueAtTime(f0,audioCtx.currentTime);o.frequency.exponentialRampToValueAtTime(Math.max(f1,1),audioCtx.currentTime+dur/1000);g.gain.setValueAtTime(.16,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+dur/1000);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+dur/1000);}catch(e){}}
+function ding(){tone(660,1320,220,"sine");setTimeout(()=>tone(880,1760,180,"sine"),90);}
+function buzz(){tone(220,140,220,"triangle");}
+function toggleMute(){muted=!muted;document.getElementById("muteBtn").textContent=muted?"\u{1F507}":"\u{1F50A}";}
+function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function unitCards(){return currentUnit==="All"?ALL:ALL.filter(c=>c.unit===currentUnit);}
+function buildTabs(){let names=["All","Unit 1","Unit 2","Unit 3"];document.getElementById("tabs").innerHTML=names.map(n=>`<button class="tab ${n===currentUnit?"active":""}" onclick="selectUnit('${n}')">${n}</button>`).join("");}
+function selectUnit(u){currentUnit=u;buildTabs();startRound();}
+function startRound(){round=shuffle([...unitCards()]).slice(0,10);roundIndex=0;answered=0;roundScore=0;render();}
 function render(){
- let c=deck[index%deck.length];
- document.getElementById("unit").textContent=c.unit;
- document.getElementById("word").textContent=c.word;
- document.getElementById("definition").textContent=c.definition;
- document.getElementById("example").textContent="Example: "+c.example;
- document.getElementById("answer").classList.add("hidden");
- document.getElementById("show").textContent="Show Definition";
- document.getElementById("rating").style.display="none";
- updateStats();
+  locked=false;
+  current=round[roundIndex];
+  document.getElementById("unit").textContent=current.unit;
+  document.getElementById("word").textContent=current.word;
+  document.getElementById("message").textContent="";
+  document.getElementById("example").textContent="";
+  const nextBtn=document.getElementById("nextBtn");
+  nextBtn.disabled=true;nextBtn.textContent="Next \u2192";
+  const sameUnit=unitCards().filter(c=>c.word!==current.word);
+  const pool=sameUnit.length>=3?sameUnit:ALL.filter(c=>c.word!==current.word);
+  const distractors=shuffle([...pool]).slice(0,3);
+  currentOpts=shuffle([current,...distractors]);
+  document.getElementById("choices").innerHTML=currentOpts.map((o,i)=>`<button class="choice" data-i="${i}" onclick="answer(${i},this)">${o.definition}</button>`).join("");
+  updateStats();
 }
-function toggleAnswer(){
- let a=document.getElementById("answer"), r=document.getElementById("rating"), s=document.getElementById("show");
- let hidden=a.classList.contains("hidden");
- a.classList.toggle("hidden");
- s.textContent=hidden?"Hide Definition":"Show Definition";
- r.style.display=hidden?"flex":"none";
+function answer(i,btn){
+  if(locked)return;
+  locked=true;
+  const chosen=currentOpts[i];
+  const ok=chosen.word===current.word;
+  const buttons=document.querySelectorAll("#choices .choice");
+  buttons.forEach(b=>b.disabled=true);
+  if(ok){
+    btn.classList.add("correct");
+    score++;roundScore++;streak++;
+    progress[current.word]="know";
+    localStorage.setItem("zenVocabProgress",JSON.stringify(progress));
+    document.getElementById("message").textContent=praise[Math.floor(Math.random()*praise.length)];
+    ding();celebrate();
+  }else{
+    btn.classList.add("wrong");
+    buttons.forEach(b=>{if(currentOpts[+b.dataset.i].word===current.word)b.classList.add("correct");});
+    streak=0;
+    if(progress[current.word]!=="know")progress[current.word]="practice";
+    localStorage.setItem("zenVocabProgress",JSON.stringify(progress));
+    document.getElementById("message").textContent=retry[Math.floor(Math.random()*retry.length)];
+    buzz();
+  }
+  document.getElementById("example").textContent="Example: "+current.example;
+  answered++;
+  const nextBtn=document.getElementById("nextBtn");
+  nextBtn.disabled=false;
+  nextBtn.textContent=answered>=10?"See Results \u{1F389}":"Next \u2192";
+  updateStats();
 }
-function next(){index=(index+1)%deck.length;render()}
-function rate(v){let c=deck[index%deck.length];progress[c.word]=v;localStorage.setItem("zenVocabProgress",JSON.stringify(progress));next()}
+function nextQuestion(){
+  if(!locked)return;
+  if(answered>=10){showCelebration();return;}
+  roundIndex++;
+  render();
+}
+function showCelebration(){
+  document.getElementById("modalText").textContent=`You finished 10 questions and got ${roundScore} right! Keep it up, Zen!`;
+  document.getElementById("modal").classList.add("show");
+  celebrate();
+}
+function closeModal(){document.getElementById("modal").classList.remove("show");startRound();}
 function updateStats(){
- let cs=unitCards(), k=cs.filter(c=>progress[c.word]==="know").length, p=cs.filter(c=>progress[c.word]==="practice").length;
- document.getElementById("know").textContent=k;document.getElementById("practice").textContent=p;document.getElementById("remaining").textContent=cs.length-k-p;
+  document.getElementById("score").textContent=score;
+  document.getElementById("streak").textContent=streak;
+  const k=ALL.filter(c=>progress[c.word]==="know").length;
+  document.getElementById("know").textContent=k+" / 44";
+  document.getElementById("bar").style.width=(answered/10*100)+"%";
 }
-function shuffle(){deck=[...unitCards()];for(let i=deck.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]]}index=0;render()}
-function speak(){let c=deck[index%deck.length];let u=new SpeechSynthesisUtterance(c.word);u.rate=.8;window.speechSynthesis.cancel();window.speechSynthesis.speak(u)}
-function startQuiz(){mode="quiz";document.getElementById("flash").style.display="none";document.getElementById("quiz").style.display="block";newQuiz()}
-let quizCard;
-function newQuiz(){
- let cs=unitCards();quizCard=cs[Math.floor(Math.random()*cs.length)];
- document.getElementById("qword").textContent=quizCard.word;
- let wrong=cs.filter(c=>c.word!==quizCard.word).sort(()=>Math.random()-.5).slice(0,3);
- let opts=[quizCard,...wrong].sort(()=>Math.random()-.5);
- document.getElementById("choices").innerHTML=opts.map(o=>`<button class="choice" onclick="answerQuiz(${JSON.stringify(o.word)})">${o.definition}</button>`).join("");
- document.getElementById("result").textContent="";
-}
-function answerQuiz(word){
- let ok=word===quizCard.word;document.getElementById("result").textContent=ok?"🎉 Correct!":"Not quite — the answer is "+quizCard.word;
- if(ok){progress[quizCard.word]="know";localStorage.setItem("zenVocabProgress",JSON.stringify(progress));updateStats()}
-}
+function speak(){const u=new SpeechSynthesisUtterance(current.word);u.rate=.8;window.speechSynthesis.cancel();window.speechSynthesis.speak(u);}
 function resetProgress(){if(confirm("Reset all of Zen's saved progress?")){progress={};localStorage.removeItem("zenVocabProgress");updateStats();}}
-buildTabs();render();
+function celebrate(){const bits=["\u{1F389}","\u2B50","\u{1F9E0}","\u{1F44F}","\u{1F31F}","\u{1F49C}"];for(let i=0;i<18;i++){let x=document.createElement("span");x.className="confetti";x.textContent=bits[Math.floor(Math.random()*bits.length)];x.style.left=Math.floor(Math.random()*97+2)+"%";x.style.top=Math.floor(Math.random()*18+3)+"%";x.style.animationDelay=(Math.random()*.2)+"s";document.body.appendChild(x);setTimeout(()=>x.remove(),1500);}}
+buildTabs();startRound();
 </script>
 <script>if ("serviceWorker" in navigator) { navigator.serviceWorker.register("sw.js").catch(()=>{}); }</script>
 </body>
